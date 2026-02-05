@@ -18,7 +18,6 @@ along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
  */
 package net.sourceforge.ganttproject.importer;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
@@ -26,29 +25,28 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
 
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.prefs.Preferences;
 
 import biz.ganttproject.core.option.GPOptionGroup;
 import net.sourceforge.ganttproject.gui.UIFacade;
 import net.sourceforge.ganttproject.gui.options.GPOptionChoicePanel;
 import net.sourceforge.ganttproject.language.GanttLanguage;
-import net.sourceforge.ganttproject.wizard.AbstractWizard;
-import net.sourceforge.ganttproject.wizard.WizardPage;
 
 /**
  * @author bard
  */
-class ImporterChooserPage implements WizardPage {
+class ImporterChooserPage implements net.sourceforge.ganttproject.gui.projectwizard.WizardPage {
   private final List<Importer> myImporters;
-  private AbstractWizard myWizard;
   private final UIFacade myUiFacade;
   private final Preferences myPrefs;
-  private int mySelectedIndex;
+  private final ImporterWizardModel myWizardState;
 
-  ImporterChooserPage(List<Importer> importers, UIFacade uiFacade, Preferences preferences) {
+  ImporterChooserPage(@NotNull List<Importer> importers, UIFacade uiFacade, Preferences preferences, @NotNull ImporterWizardModel wizardState) {
     myImporters = importers;
     myUiFacade = uiFacade;
     myPrefs = preferences;
+    myWizardState = wizardState;
   }
 
   @Override
@@ -66,29 +64,29 @@ class ImporterChooserPage implements WizardPage {
       Action nextAction = new AbstractAction(importer.getFileTypeDescription()) {
         @Override
         public void actionPerformed(ActionEvent e) {
-          mySelectedIndex = index;
-          onSelectImporter(importer);
+          //onSelectImporter(importer);
         }
       };
       choiceChangeActions[i] = nextAction;
       choiceOptions[i] = null;
     }
     GPOptionChoicePanel panel = new GPOptionChoicePanel();
+    panel.selectedIndexProperty.addListener((observable, oldValue, newValue) ->
+      onSelectImporter(myImporters.get(newValue.intValue()))
+    );
     return panel.getComponent(choiceChangeActions, choiceOptions, 0);
   }
 
   protected void onSelectImporter(Importer importer) {
-    assert myWizard != null : "It is a bug: importer chooser has not been initialized properly";
-    WizardPage filePage = new FileChooserPage(myUiFacade, importer, myPrefs.node(importer.getID()));
-    myWizard.setNextPage(filePage);
+    myWizardState.setImporter(importer);
   }
 
   @Override
-  public void setActive(AbstractWizard wizard) {
-    myWizard = wizard;
-    if (wizard != null) {
-      onSelectImporter(myImporters.get(mySelectedIndex));
-    }
+  public void setActive(boolean b) {
+//    myWizard = wizard;
+//    if (wizard != null) {
+//      onSelectImporter(myImporters.get(mySelectedIndex));
+//    }
   }
 
 

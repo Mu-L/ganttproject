@@ -16,42 +16,31 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package net.sourceforge.ganttproject.action.project;
+package net.sourceforge.ganttproject.action.project
 
-import net.sourceforge.ganttproject.GanttProject;
-import net.sourceforge.ganttproject.action.GPAction;
-import net.sourceforge.ganttproject.gui.UIFacade;
-import net.sourceforge.ganttproject.importer.ImportFileWizardImpl;
-import net.sourceforge.ganttproject.wizard.AbstractWizard;
-
-import java.awt.event.ActionEvent;
+import net.sourceforge.ganttproject.GanttProject
+import net.sourceforge.ganttproject.action.GPAction
+import net.sourceforge.ganttproject.gui.UIFacade
+import net.sourceforge.ganttproject.importer.ImportFileWizard
+import java.awt.event.ActionEvent
 
 /**
  * @author bard
  */
-public class ProjectImportAction extends GPAction {
-
-  private final UIFacade myUIFacade;
-
-  private final GanttProject myProject;
-
-  public ProjectImportAction(UIFacade uiFacade, GanttProject project) {
-    super("project.import");
-    myUIFacade = uiFacade;
-    myProject = project;
-  }
-
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    if (calledFromAppleScreenMenu(e)) {
-      return;
+class ProjectImportAction(private val myUIFacade: UIFacade, private val myProject: GanttProject) :
+    GPAction("project.import") {
+    override fun actionPerformed(e: ActionEvent?) {
+        if (calledFromAppleScreenMenu(e)) {
+            return
+        }
+        val wizard = ImportFileWizard(
+            myUIFacade, myProject,
+            myProject.ganttOptions.pluginPreferences.node("/instance/net.sourceforge.ganttproject/import")
+        )
+        wizard.show()
     }
-    AbstractWizard wizard = new ImportFileWizardImpl(myUIFacade, myProject, myProject.getGanttOptions());
-    wizard.show();
-  }
 
-  @Override
-  protected String getIconFilePrefix() {
-    return "import_";
-  }
+    override fun getIconFilePrefix(): String {
+        return "import_"
+    }
 }

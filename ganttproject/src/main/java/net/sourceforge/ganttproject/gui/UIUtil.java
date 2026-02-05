@@ -541,6 +541,7 @@ public abstract class UIUtil {
   public static void clearErrorLabel(JLabel label) {
     label.setIcon(null);
     label.setForeground(UIManager.getColor("Label.foreground"));
+    label.setText("");
   }
 
   public static void initJavaFx(final Runnable andThen) {

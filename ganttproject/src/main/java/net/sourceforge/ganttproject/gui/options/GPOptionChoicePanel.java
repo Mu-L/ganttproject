@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 package net.sourceforge.ganttproject.gui.options;
 
 import biz.ganttproject.core.option.GPOptionGroup;
+import javafx.beans.property.SimpleIntegerProperty;
 import net.sourceforge.ganttproject.gui.UIUtil;
 
 import javax.swing.*;
@@ -41,6 +42,8 @@ public class GPOptionChoicePanel {
   private String mySavedSelectedText;
 
   private OptionsPageBuilder myOptionPageBuilder = new OptionsPageBuilder();
+
+  public final SimpleIntegerProperty selectedIndexProperty = new SimpleIntegerProperty(-1);
 
   public JComponent getComponent(Action[] choiceChangeActions, GPOptionGroup[] choiceOptions, int selectedGroupIndex) {
     JComponent[] choiceComponents = new JComponent[choiceOptions.length];
@@ -108,6 +111,7 @@ public class GPOptionChoicePanel {
     mySelectedIndex = selectedIndex;
     newSelected.setSelected(true);
     setEnabledTree(myOptionComponents[mySelectedIndex], true);
+    selectedIndexProperty.set(selectedIndex);
   }
 
   private void setEnabledTree(JComponent root, boolean isEnabled) {

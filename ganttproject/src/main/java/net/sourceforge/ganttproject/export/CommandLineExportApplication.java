@@ -86,7 +86,7 @@ public class CommandLineExportApplication {
 //    }
 
     Job.getJobManager().setProgressProvider(new ConsoleProgressProvider());
-    File outputFile = args.outputFile == null ? FileChooserPage.proposeOutputFile(project, exporter)
+    File outputFile = args.outputFile == null ? ExportFileChooserPageKt.proposeOutputFile(project, exporter)
         : args.outputFile;
 
     Preferences prefs = new PluginPreferencesImpl(null, "");

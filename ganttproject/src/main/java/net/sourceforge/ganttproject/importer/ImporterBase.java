@@ -24,9 +24,9 @@ import net.sourceforge.ganttproject.GPLogger;
 import net.sourceforge.ganttproject.IGanttProject;
 import net.sourceforge.ganttproject.gui.NotificationChannel;
 import net.sourceforge.ganttproject.gui.UIFacade;
+import net.sourceforge.ganttproject.gui.projectwizard.WizardPage;
 import net.sourceforge.ganttproject.language.GanttLanguage;
 import net.sourceforge.ganttproject.util.collect.Pair;
-import net.sourceforge.ganttproject.wizard.WizardPage;
 import org.osgi.service.prefs.Preferences;
 
 import java.io.File;
@@ -46,10 +46,6 @@ public abstract class ImporterBase implements Importer {
   private Preferences myPrefs;
   private File myFile;
 
-//  protected ImporterBase() {
-//    myID = "";
-//  }
-//
   protected ImporterBase(String id) {
     myID = id;
   }

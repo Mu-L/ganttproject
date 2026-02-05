@@ -25,9 +25,9 @@ import biz.ganttproject.core.calendar.CalendarEvent;
 import net.fortuna.ical4j.data.ParserException;
 import net.sourceforge.ganttproject.GPLogger;
 import net.sourceforge.ganttproject.calendar.CalendarEditorPanel;
+import net.sourceforge.ganttproject.gui.UIFacade;
+import net.sourceforge.ganttproject.gui.projectwizard.WizardPage;
 import net.sourceforge.ganttproject.importer.ImporterBase;
-import net.sourceforge.ganttproject.wizard.AbstractWizard;
-import net.sourceforge.ganttproject.wizard.WizardPage;
 
 import javax.swing.*;
 import java.io.*;
@@ -43,11 +43,11 @@ import java.util.List;
 public class IcsFileImporter extends ImporterBase {
   private static final LoggerApi LOGGER = GPLogger.create("Import.Ics");
   private static final DefaultLocalizer ourLocalizer = InternationalizationKt.getRootLocalizer();
-  private final CalendarEditorPage myEditorPage;
+  private CalendarEditorPage myEditorPage;
 
   public IcsFileImporter() {
     super("impex.ics");
-    myEditorPage = new CalendarEditorPage();
+    myEditorPage = null;
   }
 
   @Override
@@ -57,20 +57,23 @@ public class IcsFileImporter extends ImporterBase {
 
   @Override
   public void run() {
-    getUiFacade().getUndoManager().undoableEdit(ourLocalizer.formatText("importCalendar"), new Runnable() {
-      @Override
-      public void run() {
+//    getUiFacade().getUndoManager().undoableEdit(ourLocalizer.formatText("importCalendar"), new Runnable() {
+//      @Override
+//      public void run() {
         List<CalendarEvent> events = myEditorPage.getEvents();
         if (events != null) {
           getProject().getActiveCalendar().setPublicHolidays(events);
         }
-      }
-    });
+//      }
+//    });
   }
 
 
   @Override
   public WizardPage getCustomPage() {
+    if (myEditorPage == null) {
+      myEditorPage = new CalendarEditorPage(getUiFacade());
+    }
     return myEditorPage;
   }
 
@@ -92,9 +95,15 @@ public class IcsFileImporter extends ImporterBase {
    * Calendar editor page which wraps a {@link CalendarEditorPanel} instance
    */
   static class CalendarEditorPage implements WizardPage {
+    private final UIFacade myUiFacade;
     private File myFile;
     private final JPanel myPanel = new JPanel();
     private List<CalendarEvent> myEvents;
+
+    public CalendarEditorPage(UIFacade uiFacade) {
+      myUiFacade = uiFacade;
+    }
+
     private void setFile(File f) {
       myFile = f;
     }
@@ -112,12 +121,13 @@ public class IcsFileImporter extends ImporterBase {
       return myPanel;
     }
 
-    public void setActive(AbstractWizard wizard) {
-      if (wizard != null) {
+    @Override
+    public void setActive(boolean b) {
+      if (b) {
         myPanel.removeAll();
         if (myFile != null && myFile.exists() && myFile.canRead()) {
           if (myEvents != null) {
-            myPanel.add(new CalendarEditorPanel(wizard.getUIFacade(), myEvents, null).createComponent());
+            myPanel.add(new CalendarEditorPanel(myUiFacade, myEvents, null).createComponent());
             return;
           } else {
             LOGGER.error("No events found in file {}", new Object[]{myFile}, Collections.emptyMap(), null);

@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 package net.sourceforge.ganttproject.export;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
@@ -26,7 +27,7 @@ import javax.swing.SwingUtilities;
 
 import biz.ganttproject.app.InternationalizationKt;
 import kotlin.Unit;
-import net.sourceforge.ganttproject.gui.projectwizard.WizardBuilder;
+import net.sourceforge.ganttproject.gui.projectwizard.WizardModel;
 import net.sourceforge.ganttproject.gui.projectwizard.WizardImplFxKt;
 import org.osgi.service.prefs.Preferences;
 
@@ -50,11 +51,11 @@ public class ExportFileWizardImpl {
 
   private static Exporter ourLastSelectedExporter;
   private static List<Exporter> ourExporters;
-  private final WizardBuilder wizardBuilder = new WizardBuilder();
+  private final WizardModel wizardModel = new WizardModel();
 
   public ExportFileWizardImpl(UIFacade uiFacade, IGanttProject project, Preferences pluginPreferences) {
-    wizardBuilder.setTitle(InternationalizationKt.getRootLocalizer().formatText("exportWizard.dialog.title"));
-    wizardBuilder.setDialogId("wizard.export");
+    wizardModel.setTitle(InternationalizationKt.getRootLocalizer().formatText("exportWizard.dialog.title"));
+    wizardModel.setDialogId("wizard.export");
 
     final Preferences exportNode = pluginPreferences.node("/instance/net.sourceforge.ganttproject/export");
     myProject = project;
@@ -74,17 +75,14 @@ public class ExportFileWizardImpl {
       e.setContext(project, uiFacade, pluginPreferences);
     }
 
-    var fileChooserPage = new FileChooserPage(myState, myProject, exportNode, uiFacade);
-    wizardBuilder.addPage(new ExporterChooserPage(ourExporters, myState));
-    wizardBuilder.addPage(fileChooserPage);
-    wizardBuilder.setOnOk(() -> {
+    var fileChooserPage = new ExportFileChooserPage(myState, myProject, exportNode, uiFacade);
+    wizardModel.addPage(new ExporterChooserPage(ourExporters, myState));
+    wizardModel.addPage(fileChooserPage);
+    wizardModel.setOnOk(() -> {
       onOkPressed();
       return Unit.INSTANCE;
     });
-    fileChooserPage.selectedUrlProperty.addListener((observable, oldValue, newValue) -> {
-      wizardBuilder.getNeedsRefresh().set(true, this);
-    });
-    wizardBuilder.setCanFinish(this::canFinish);
+    wizardModel.setCanFinish(this::canFinish);
   }
 
   protected boolean canFinish() {
@@ -105,7 +103,7 @@ public class ExportFileWizardImpl {
   }
 
   public void show() {
-    WizardImplFxKt.showWizard(wizardBuilder);
+    WizardImplFxKt.showWizard(wizardModel);
   }
 
   private class ExportFinalizationJobImpl implements ExportFinalizationJob {
@@ -124,6 +122,7 @@ public class ExportFileWizardImpl {
     private final BooleanOption myPublishInWebOption = new DefaultBooleanOption("exporter.publishInWeb");
 
     private URL myUrl;
+    private File myFile;
 
     void setExporter(Exporter exporter) {
       myExporter = exporter;
@@ -138,12 +137,25 @@ public class ExportFileWizardImpl {
       return myPublishInWebOption;
     }
 
-    void setUrl(URL url) {
-      myUrl = url;
-    }
-
     public URL getUrl() {
       return myUrl;
+    }
+
+    public void setFile(File file) {
+      myFile = file;
+      if (file != null) {
+        try {
+          myUrl = file.toURI().toURL();
+        } catch (MalformedURLException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        myUrl = null;
+      }
+    }
+
+    public File getFile() {
+      return myFile;
     }
   }
 }

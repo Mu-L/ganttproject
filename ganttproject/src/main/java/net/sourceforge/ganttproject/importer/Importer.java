@@ -20,12 +20,12 @@ package net.sourceforge.ganttproject.importer;
 
 import java.io.File;
 
+import net.sourceforge.ganttproject.gui.projectwizard.WizardPage;
 import org.osgi.service.prefs.Preferences;
 
 import biz.ganttproject.core.option.GPOptionGroup;
 import net.sourceforge.ganttproject.IGanttProject;
 import net.sourceforge.ganttproject.gui.UIFacade;
-import net.sourceforge.ganttproject.wizard.WizardPage;
 
 public interface Importer {
   String getID();

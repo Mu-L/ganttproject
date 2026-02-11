@@ -28,6 +28,8 @@ import net.sourceforge.ganttproject.GanttProject
 import net.sourceforge.ganttproject.IGanttProject
 import net.sourceforge.ganttproject.action.GPAction
 import net.sourceforge.ganttproject.document.webdav.WebDavStorageImpl
+import net.sourceforge.ganttproject.export.ExportFileWizardImpl
+import net.sourceforge.ganttproject.importer.ImportFileWizard
 import javax.swing.Action
 import javax.swing.JMenu
 import javax.swing.JMenuItem
@@ -53,9 +55,14 @@ class ProjectMenu(project: GanttProject, window: Window, key: String) : JMenu(GP
   )
 
   private val projectSettingsAction = ProjectPropertiesAction(project.project, project.uiFacade)
-  private val importAction = ProjectImportAction(project.uiFacade, project)
-  private val exportAction = ProjectExportAction(
-      project.uiFacade, project, project.ganttOptions.pluginPreferences)
+  private val importAction = GPAction.create("project.import") {
+    ImportFileWizard(project.uiFacade, project,
+      project.ganttOptions.pluginPreferences.node("/instance/net.sourceforge.ganttproject/import")
+    ).show()
+  }
+  private val exportAction = GPAction.create("project.export") {
+    ExportFileWizardImpl(project.uiFacade, project, project.ganttOptions.pluginPreferences).show()
+  }
   //private val printAction = PrintAction(project)
   //private val printPreviewAction = ProjectPreviewAction(project)
   private val printAction = createPrintAction(project.uiFacade, project.ganttOptions.pluginPreferences)

@@ -38,7 +38,6 @@ import javafx.scene.effect.InnerShadow
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.stage.FileChooser
-import javafx.util.StringConverter
 import net.sourceforge.ganttproject.action.GPAction
 import net.sourceforge.ganttproject.gui.GPColorChooser
 import net.sourceforge.ganttproject.util.BrowserControl
@@ -72,7 +71,7 @@ class PropertySheet(
     set(value) { node.isDisable = value }
 }
 
-class PropertyPaneBuilder(private val localizer: Localizer, private val gridPane: PropertyPane) {
+class PropertyPaneBuilderImpl(private val localizer: Localizer, private val gridPane: PropertyPane): PropertyPaneBuilder {
   internal val validationErrors = FXCollections.observableMap(mutableMapOf<ObservableProperty<*>, String>())
   internal val isEscCloseEnabled = SimpleBooleanProperty(true)
   internal val rowBuilders = mutableListOf<RowBuilder>()
@@ -114,7 +113,7 @@ class PropertyPaneBuilder(private val localizer: Localizer, private val gridPane
 
   fun date(property: ObservableDate, options: (DateDisplayOptions.()->Unit)? = null) {
     rowBuilders.add(run {
-      val optionValues = options?.let { DateDisplayOptions().apply(it) } ?: DateDisplayOptions()
+      val optionValues = options?.let { DateDisplayOptions(createDateConverter()).apply(it) } ?: DateDisplayOptions(createDateConverter())
       createOptionItem(property, createDateOptionEditor(property, optionValues))
     })
   }
@@ -137,14 +136,14 @@ class PropertyPaneBuilder(private val localizer: Localizer, private val gridPane
     })
   }
 
-  fun <E: Enum<E>> dropdown(property: ObservableEnum<E>, optionValues: (DropdownDisplayOptions<E>.()->Unit)? = null) {
+  override fun <E: Enum<E>> dropdown(property: ObservableEnum<E>, optionValues: (DropdownDisplayOptions<E>.()->Unit)?) {
     rowBuilders.add(run {
       val options = optionValues?.let { DropdownDisplayOptions<E>().apply(it) }
       createOptionItem(property, createEnumerationOptionEditor(property, options))
     })
   }
 
-  fun <T> dropdown(property: ObservableChoice<T>, displayOptions: (DropdownDisplayOptions<T>.()->Unit)? = null) {
+  override fun <T> dropdown(property: ObservableChoice<T>, displayOptions: (DropdownDisplayOptions<T>.()->Unit)?) {
     rowBuilders.add(run {
       val options = displayOptions?.let { DropdownDisplayOptions<T>().apply(it) }
       createOptionItem(property, createChoiceOptionEditor(property, options))
@@ -308,7 +307,7 @@ class PropertyPaneBuilder(private val localizer: Localizer, private val gridPane
 
   }
 
-  fun createDateOptionEditor(option: ObservableDate, displayOptions: DateDisplayOptions = DateDisplayOptions()): DatePicker {
+  fun createDateOptionEditor(option: ObservableDate, displayOptions: DateDisplayOptions = DateDisplayOptions(createDateConverter())): DatePicker {
     return DatePicker(option.value ?: LocalDate.now()).also { picker ->
       option.addWatcher { evt ->
         if (evt.trigger != picker) picker.value = evt.newValue
@@ -546,11 +545,19 @@ class PropertyPaneBuilder(private val localizer: Localizer, private val gridPane
 }
 
 /**
+ * The root DSL element for building a property pane:
+ *
+ * properties {
+ * ...
+ * }
+ */
+fun properties(i18n: Localizer = RootLocalizer, code: PropertyPaneBuilderImpl.()->Unit): Node = PropertySheetBuilder(i18n).pane(code).node
+/**
  * Provides a small DSL for building a property sheet.
  */
 class PropertySheetBuilder(private val localizer: Localizer) {
 
-  fun pane(code: PropertyPaneBuilder.()->Unit): PropertySheet {
+  fun pane(code: PropertyPaneBuilderImpl.()->Unit): PropertySheet {
     val gridPane = PropertyPane().also {
       it.styleClass.add("property-pane")
       it.stylesheets.add("/biz/ganttproject/app/PropertySheet.css")
@@ -558,7 +565,7 @@ class PropertySheetBuilder(private val localizer: Localizer) {
     gridPane.columnConstraints.add(ColumnConstraints().also {
       it.isFillWidth = true
     })
-    val paneBuilder = PropertyPaneBuilder(localizer, gridPane).apply(code)
+    val paneBuilder = PropertyPaneBuilderImpl(localizer, gridPane).apply(code)
     var rowNum = 1
     paneBuilder.rowBuilders.forEachIndexed { _, builder ->
       rowNum = builder.build(gridPane, rowNum) + 1
@@ -609,33 +616,6 @@ private class OpenUrlAction(private val url: String): GPAction("help.openUrl") {
   }
 }
 
-enum class LabelPosition {
-  LEFT, ABOVE
-}
-sealed class PropertyDisplayOptions<P> {
-  var labelPosition: LabelPosition = LabelPosition.LEFT
-  val editorStyles = mutableListOf<String>()
-}
-data class TextDisplayOptions(
-  var isMultiline: Boolean = false,
-  var isScreened: Boolean = false,
-  var columnCount: Int = 40,
-  var rightNode: Node? = null,
-): PropertyDisplayOptions<String?>()
-data class FileExtensionFilter(val description: String, val extensions: List<String>)
-data class FileDisplayOptions(val extensionFilters: MutableList<FileExtensionFilter> = mutableListOf<FileExtensionFilter>()): PropertyDisplayOptions<File>()
-data class IntDisplayOptions(
-  var minValue: Int = 0,
-  var maxValue: Int = Int.MAX_VALUE,
-) : PropertyDisplayOptions<Int>()
-
-data class DateDisplayOptions(
-  var stringConverter: StringConverter<LocalDate> = createDateConverter()
-): PropertyDisplayOptions<LocalDate>()
-
-data class DropdownDisplayOptions<E>(
-  var cellFactory: ((ListCell<Pair<E, String>>, Pair<E, String>) -> Node)? = null
-): PropertyDisplayOptions<E>()
 
 /**
  * Validator that checks if the text input can be parsed as a monetary value, using the currently chosen locale settings.

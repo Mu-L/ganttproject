@@ -18,12 +18,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 package net.sourceforge.ganttproject.export;
 
-import biz.ganttproject.core.option.DefaultEnumerationOption;
-import biz.ganttproject.core.option.GPOption;
-import biz.ganttproject.core.option.GPOptionGroup;
+import biz.ganttproject.core.option.*;
 import biz.ganttproject.impex.csv.GanttCSVExport;
 import biz.ganttproject.impex.csv.SpreadsheetFormat;
 import biz.ganttproject.impex.csv.SpreadsheetWriter;
+import kotlin.Unit;
 import net.sourceforge.ganttproject.GPLogger;
 import net.sourceforge.ganttproject.GanttProject;
 import net.sourceforge.ganttproject.io.CSVOptions;
@@ -42,9 +41,19 @@ import java.util.stream.Stream;
 
 public class ExporterToCSV extends ExporterBase {
   static class FormatOption extends DefaultEnumerationOption<SpreadsheetFormat> {
+    private ObservableEnum<SpreadsheetFormat> observable = new ObservableEnum<>("impex.csv.format", SpreadsheetFormat.CSV, SpreadsheetFormat.values());
     FormatOption() {
       super("impex.csv.format", SpreadsheetFormat.values());
       setSelectedValue(SpreadsheetFormat.CSV);
+      observable.addWatcher(evt -> {
+        setSelectedValue(evt.getNewValue());
+        return Unit.INSTANCE;
+      });
+    }
+
+    @Override
+    public void visitPropertyPaneBuilder(PropertyPaneBuilder builder) {
+      builder.dropdown(observable, null);
     }
   }
 

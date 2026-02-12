@@ -20,6 +20,7 @@ package biz.ganttproject.app
 
 import biz.ganttproject.lib.fx.VBoxBuilder
 import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.layout.BorderPane
@@ -41,7 +42,7 @@ data class OptionElementData<T>(val i18nKey: String, val userData: T, val isSele
  * to JOptionPane class.
  */
 class OptionPaneBuilder<T> {
-  var i18n = RootLocalizer
+  var i18n: Localizer = RootLocalizer
   val titleString: LocalizedString by lazy { i18n.create("title") }
   val titleHelpString: LocalizedString? by lazy { i18n.create("titleHelp") }
 
@@ -68,6 +69,8 @@ class OptionPaneBuilder<T> {
 
   var toggleGroup: ToggleGroup = ToggleGroup()
 
+  var onSelect: (T) -> Unit = {}
+
   fun buildPane(): Pane {
     return buildPaneImpl(this.toggleGroup).also {
       it.styleClass.add(this@OptionPaneBuilder.styleClass)
@@ -76,23 +79,33 @@ class OptionPaneBuilder<T> {
 
   private fun buildPaneImpl(lockGroup: ToggleGroup): Pane {
     val vbox = VBoxBuilder()
-    this.elements.forEach {
+    val customNodes = this.elements.map { it.customContent }
+    fun enableCustomNode(idx: Int) {
+      customNodes.forEach { it?.isDisable = true }
+      customNodes[idx]?.isDisable = false
+    }
+    this.elements.forEachIndexed { index, element ->
       val btn = RadioButton().also { btn ->
-        btn.textProperty().bind(i18n.create(it.i18nKey))
+        btn.textProperty().bind(i18n.create(element.i18nKey))
         btn.styleClass.add("btn-option")
-        btn.userData = it.userData
+        btn.userData = element.userData
         btn.toggleGroup = lockGroup
-        btn.isSelected = it.isSelected
+        btn.isSelected = element.isSelected
+        btn.onAction = EventHandler {
+          onSelect(element.userData)
+          enableCustomNode(index)
+        }
       }
       vbox.add(btn)
 
-      if (this.i18n.formatTextOrNull("${it.i18nKey}.help") != null) {
+      if (this.i18n.formatTextOrNull("${element.i18nKey}.help") != null) {
         vbox.add(Label().apply {
-          this.textProperty().bind(i18n.create("${it.i18nKey}.help"))
+          this.textProperty().bind(i18n.create("${element.i18nKey}.help"))
           this.styleClass.add("option-help")
         })
       }
-      it.customContent?.let(vbox::add)
+      customNodes[index]?.let(vbox::add)
+      enableCustomNode(0)
     }
     return vbox.vbox
   }

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2024 BarD Software s.r.o., Dmitry Barashev.
+ * Copyright 2026 BarD Software s.r.o., Dmitry Barashev.
  *
  * This file is part of GanttProject, an opensource project management tool.
  *
@@ -26,8 +26,6 @@
   -fx-min-width: 400;
 
   .content-pane {
-    -fx-padding: 20 20 20 20;
-
     .title {
       -fx-font-weight: bold;
       -fx-font-size: 130%;
@@ -56,14 +54,27 @@
     @include dialog-header($gp-orange);
   }
   .content-pane {
+    -fx-padding: 2em 1em;
     -fx-pref-height: 600;
     -fx-pref-width: 600;
-    @include dialog-content-padding();
     -fx-border-width: 0;
     //-fx-border-color: red;
   }
   .button-pane {
     @include dialog-button-pane();
+  }
+
+  .exporter-chooser-page {
+    .btn-option {
+      -fx-padding: 1em 0 0 1em;
+      -fx-border-color: yellow;
+      -fx-border-width: 1;
+    }
+    .property-pane {
+      -fx-padding: -1em 4em;
+      -fx-border-color: red;
+      -fx-border-width: 0;
+    }
   }
 }
 

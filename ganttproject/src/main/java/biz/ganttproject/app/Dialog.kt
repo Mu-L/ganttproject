@@ -22,7 +22,6 @@ import biz.ganttproject.FXUtil
 import biz.ganttproject.centerOnOwner
 import biz.ganttproject.colorFromUiManager
 import biz.ganttproject.lib.fx.VBoxBuilder
-import biz.ganttproject.printCss
 import biz.ganttproject.walkTree
 import com.sandec.mdfx.MDFXNode
 import javafx.animation.FadeTransition
@@ -52,9 +51,12 @@ import net.sourceforge.ganttproject.action.CancelAction
 import net.sourceforge.ganttproject.action.GPAction
 import net.sourceforge.ganttproject.action.OkAction
 import net.sourceforge.ganttproject.gui.UIFacade
-import java.util.Stack
 import java.util.concurrent.CountDownLatch
+import javax.swing.JComboBox
+import javax.swing.JPopupMenu
 import javax.swing.SwingUtilities
+import javax.swing.event.PopupMenuEvent
+import javax.swing.plaf.basic.BasicComboPopup
 import kotlin.math.max
 
 /**
@@ -783,6 +785,7 @@ fun main() {
       val btnOpen = Button("Open Pure JavaFX Dialog")
       btnOpen.onAction = EventHandler {
         val dialog = Dialog<Unit>()
+        dialog.initOwner(primaryStage)
         dialog.title = "Pure JavaFX Layout Test"
 
         val pane = object : DialogPane() {
@@ -805,7 +808,33 @@ fun main() {
 //          padding = Insets(20.0)
 ////          minWidth = 200.0
 //        }
-        pane.content = StackPane()//SwingNode()
+        val swingNode = SwingNode()
+        SwingUtilities.invokeLater {
+          JPopupMenu.setDefaultLightWeightPopupEnabled(true);
+          swingNode.content = JComboBox(arrayOf("Alpha", "Beta", "Gamma", "Delta")).also { it ->
+            it.addPopupMenuListener(object: javax.swing.event.PopupMenuListener {
+              override fun popupMenuWillBecomeVisible(e: PopupMenuEvent) {
+
+                val combo = e.getSource() as JComboBox<*>;
+                val popup = combo.ui.getAccessibleChild(combo, 0) as? BasicComboPopup ?: return
+                popup.isLightWeightPopupEnabled = false
+//                SwingUtilities.invokeLater {
+//                  val p = combo.locationOnScreen
+//                  popup.setLocation((p.x * 1.5).toInt(), (1.5 * p.y).toInt() + combo.height)
+//                }
+              }
+
+              override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent?) {
+              }
+
+              override fun popupMenuCanceled(e: PopupMenuEvent?) {
+              }
+              // Implement other methods...
+            });
+          }
+
+        }
+        pane.content = swingNode
 
         pane.buttonTypes.addAll(
           ButtonType.OK,

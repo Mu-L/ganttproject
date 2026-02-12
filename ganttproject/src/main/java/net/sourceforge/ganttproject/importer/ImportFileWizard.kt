@@ -25,6 +25,8 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import javafx.beans.property.SimpleObjectProperty
+import javafx.scene.Node
+import javafx.scene.control.Label
 import net.sourceforge.ganttproject.IGanttProject
 import net.sourceforge.ganttproject.filter.ExtensionBasedFileFilter
 import net.sourceforge.ganttproject.gui.FileChooserPageBase
@@ -34,6 +36,7 @@ import net.sourceforge.ganttproject.gui.projectwizard.WizardPage
 import net.sourceforge.ganttproject.gui.projectwizard.showWizard
 import net.sourceforge.ganttproject.plugins.PluginManager.*
 import org.osgi.service.prefs.Preferences
+import java.awt.Component
 import java.io.File
 import javax.swing.filechooser.FileFilter
 
@@ -102,6 +105,23 @@ private fun getImporters(): MutableList<Importer> {
   return getExtensions(Importer.EXTENSION_POINT_ID, Importer::class.java)
 }
 
+private class ImporterChooserPageFx(
+  importers: List<Importer>,
+  uiFacade: UIFacade,
+  pluginPreferences: Preferences,
+  wizardModel: ImporterWizardModel
+) : WizardPage {
+  override val title: String = i18n.formatText("importerChooserPageTitle")
+  override val component: Component?
+    get() = null
+
+  override fun setActive(b: Boolean) {
+  }
+
+  override val fxComponent: Node by lazy {
+    Label("foo")
+  }
+}
 /**
  * Wizard page for choosing a file to import from.
  */

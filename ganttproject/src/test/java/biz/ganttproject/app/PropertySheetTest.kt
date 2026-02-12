@@ -18,6 +18,7 @@ along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
 */
 package biz.ganttproject.app
 
+import biz.ganttproject.core.option.DateDisplayOptions
 import biz.ganttproject.core.option.ObservableDate
 import biz.ganttproject.core.option.ObservableString
 import javafx.scene.control.TextField
@@ -35,7 +36,7 @@ class PropertySheetTest {
     coroutineScope.launch {
       try {
         withContext(Dispatchers.JavaFx) {
-          val propertyPaneBuilder = PropertyPaneBuilder(DummyLocalizer, PropertyPane())
+          val propertyPaneBuilder = PropertyPaneBuilderImpl(DummyLocalizer, PropertyPane())
           val textProperty = ObservableString("prop1", "Lorem Ipsum")
           val editor = propertyPaneBuilder.createStringOptionEditor(textProperty)
           (editor as? TextField)?.let {
@@ -56,9 +57,9 @@ class PropertySheetTest {
   @Test fun `date property considers formatting settings`() {
     coroutineScope.launch {
       withContext(Dispatchers.JavaFx) {
-        val propertyPaneBuilder = PropertyPaneBuilder(DummyLocalizer, PropertyPane())
+        val propertyPaneBuilder = PropertyPaneBuilderImpl(DummyLocalizer, PropertyPane())
         val dateProperty = ObservableDate("prop1", LocalDate.now())
-        val editor = propertyPaneBuilder.createDateOptionEditor(dateProperty, DateDisplayOptions().apply {
+        val editor = propertyPaneBuilder.createDateOptionEditor(dateProperty, DateDisplayOptions(createDateConverter()).apply {
           stringConverter = FormatterBasedDateConverter(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
         })
         dateProperty.value = LocalDate.of(2025, 9, 22)

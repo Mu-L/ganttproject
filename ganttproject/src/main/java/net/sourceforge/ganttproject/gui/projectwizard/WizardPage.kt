@@ -16,16 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package net.sourceforge.ganttproject.gui.projectwizard;
+package net.sourceforge.ganttproject.gui.projectwizard
 
-import java.awt.Component;
+import javafx.scene.Node
+import java.awt.Component
 
-public interface WizardPage {
-  /** @return the title of the page */
-  String getTitle();
+interface WizardPage {
+    /** @return the title of the page
+     */
+    val title: String
 
-  /** @return the Component that makes the page */
-  Component getComponent();
+    val fxComponent: Node? get() = null
 
-  void setActive(boolean b);
+    /** @return the Component that makes the page
+     */
+    val component: Component?
+
+    fun setActive(b: Boolean)
 }

@@ -18,6 +18,7 @@ along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
 */
 package biz.ganttproject.app
 
+import biz.ganttproject.core.option.DropdownDisplayOptions
 import biz.ganttproject.core.option.ObservableChoice
 import biz.ganttproject.core.option.ObservableProperty
 import javafx.collections.FXCollections

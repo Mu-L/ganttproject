@@ -25,7 +25,7 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
-import biz.ganttproject.app.InternationalizationKt;
+import biz.ganttproject.app.InternationalizationCoreKt;
 import kotlin.Unit;
 import net.sourceforge.ganttproject.gui.projectwizard.WizardModel;
 import net.sourceforge.ganttproject.gui.projectwizard.WizardImplFxKt;
@@ -54,7 +54,7 @@ public class ExportFileWizardImpl {
   private final WizardModel wizardModel = new WizardModel();
 
   public ExportFileWizardImpl(UIFacade uiFacade, IGanttProject project, Preferences pluginPreferences) {
-    wizardModel.setTitle(InternationalizationKt.getRootLocalizer().formatText("exportWizard.dialog.title"));
+    wizardModel.setTitle(InternationalizationCoreKt.getRootLocalizer().formatText("exportWizard.dialog.title"));
     wizardModel.setDialogId("wizard.export");
 
     final Preferences exportNode = pluginPreferences.node("/instance/net.sourceforge.ganttproject/export");
@@ -76,7 +76,7 @@ public class ExportFileWizardImpl {
     }
 
     var fileChooserPage = new ExportFileChooserPage(myState, myProject, exportNode, uiFacade);
-    wizardModel.addPage(new ExporterChooserPage(ourExporters, myState));
+    wizardModel.addPage(new ExporterChooserPageFx(ourExporters, myState));
     wizardModel.addPage(fileChooserPage);
     wizardModel.setOnOk(() -> {
       onOkPressed();
@@ -116,7 +116,7 @@ public class ExportFileWizardImpl {
     }
   }
 
-  static class State {
+  public static class State {
     private Exporter myExporter;
 
     private final BooleanOption myPublishInWebOption = new DefaultBooleanOption("exporter.publishInWeb");

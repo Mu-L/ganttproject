@@ -78,7 +78,9 @@ internal fun createTranslation(locale: Locale, resourceBundle: ResourceBundle) =
 
 var _explicitTranslation: Translation? = null
 val defaultTranslation by lazy {
-  _explicitTranslation ?: createTranslationFromFile(Locale.ENGLISH, "i18n.properties") ?: Translation(Locale.ENGLISH) { null }
+  (_explicitTranslation ?: createTranslationFromFile(Locale.ENGLISH, "i18n.properties") ?: Translation(Locale.ENGLISH) { null }).also {
+    DEFAULT_TRANSLATION_LOCALIZER = SingleTranslationLocalizer(it)
+  }
 }
 
 internal fun createTranslationFromFile(locale: Locale, fileName: String): Translation? {
@@ -136,3 +138,7 @@ private val LEXICOGRAPHICAL_LOCALE_COMPARATOR: Comparator<Locale> = Comparator {
     o2.getDisplayLanguage(Locale.US) + o2.getDisplayCountry(Locale.US)
   )
 }
+
+
+
+

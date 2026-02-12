@@ -152,7 +152,7 @@ abstract class GanttProjectBase implements IGanttProject, UIFacade {
     if (isModified()) {
       builder.append("* ");
     }
-    builder.append(InternationalizationKt.getRootLocalizer().formatText("appliTitle"));
+    builder.append(InternationalizationCoreKt.getRootLocalizer().formatText("appliTitle"));
     var doc = getDocument();
     if (doc != null) {
       builder.append("[").append(doc.getFileName()).append("]");

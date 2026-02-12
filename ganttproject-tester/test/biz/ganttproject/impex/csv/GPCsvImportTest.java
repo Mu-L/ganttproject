@@ -20,7 +20,7 @@ package biz.ganttproject.impex.csv;
 
 import biz.ganttproject.app.DefaultLocalizer;
 import biz.ganttproject.app.DummyLocalizer;
-import biz.ganttproject.app.InternationalizationKt;
+import biz.ganttproject.app.InternationalizationCoreKt;
 import biz.ganttproject.core.model.task.TaskDefaultColumn;
 import biz.ganttproject.core.time.impl.GregorianTimeUnitStack;
 import biz.ganttproject.customproperty.CustomPropertyDefinition;
@@ -110,7 +110,7 @@ public class GPCsvImportTest extends TestCase {
         return GanttLanguage.getInstance().getText(key);
       }
     });
-    InternationalizationKt.setRootLocalizer(new DefaultLocalizer("", DummyLocalizer.INSTANCE, null,
+    InternationalizationCoreKt.setRootLocalizer(new DefaultLocalizer("", DummyLocalizer.INSTANCE, null,
       new SimpleObjectProperty(null)) {
       @Nullable
       @Override

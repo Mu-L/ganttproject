@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 package net.sourceforge.ganttproject.gui;
 
 import biz.ganttproject.app.DialogKt;
-import biz.ganttproject.app.InternationalizationKt;
+import biz.ganttproject.app.InternationalizationCoreKt;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import kotlin.Unit;
@@ -32,7 +32,7 @@ import net.sourceforge.ganttproject.GPLogger;
  */
 public class ViewLogDialog {
   public static void show() {
-    DialogKt.dialog(InternationalizationKt.getRootLocalizer().formatText("viewLog"), "viewLog", dlg -> {
+    DialogKt.dialog(InternationalizationCoreKt.getRootLocalizer().formatText("viewLog"), "viewLog", dlg -> {
       dlg.addStyleSheet("/biz/ganttproject/app/Dialog.css");
       dlg.addStyleClass("dlg");
       var textArea = new TextArea(GPLogger.readLog());
@@ -45,7 +45,7 @@ public class ViewLogDialog {
       });
       dlg.setupButton(ButtonType.CLOSE, btn -> {
         btn.getStyleClass().addAll("btn", "btn-attention");
-        btn.setText(InternationalizationKt.getRootLocalizer().formatText("close"));
+        btn.setText(InternationalizationCoreKt.getRootLocalizer().formatText("close"));
         btn.setOnAction(event -> {
           dlg.hide();
         });

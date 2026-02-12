@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 package biz.ganttproject.impex.csv;
 
-import biz.ganttproject.app.InternationalizationKt;
+import biz.ganttproject.app.InternationalizationCoreKt;
 import biz.ganttproject.core.model.task.TaskDefaultColumn;
 import biz.ganttproject.core.option.BooleanOption;
 import biz.ganttproject.customproperty.CustomPropertyDefinition;
@@ -153,7 +153,7 @@ public class GanttCSVExport {
   }
 
   private String i18n(String key) {
-    return InternationalizationKt.getRootLocalizer().formatText(key);
+    return InternationalizationCoreKt.getRootLocalizer().formatText(key);
   }
 
   private void writeTasks(SpreadsheetWriter writer) throws IOException {

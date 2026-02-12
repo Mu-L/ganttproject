@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 package net.sourceforge.ganttproject.action;
 
 import biz.ganttproject.FXUtil;
-import biz.ganttproject.app.InternationalizationKt;
+import biz.ganttproject.app.InternationalizationCoreKt;
 import biz.ganttproject.app.LocalizedString;
 import com.google.common.base.Strings;
 import javafx.event.EventHandler;
@@ -104,7 +104,7 @@ public abstract class GPAction extends AbstractAction implements GanttLanguage.L
   protected GPAction(String name, String iconSize) {
     super(name);
     myName = name;
-    myNameObservable = InternationalizationKt.getRootLocalizer().create(name == null ? "" : name);
+    myNameObservable = InternationalizationCoreKt.getRootLocalizer().create(name == null ? "" : name);
     myIconSize = iconSize;
     if (iconSize != null) {
       updateIcon(iconSize);

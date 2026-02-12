@@ -4,14 +4,13 @@
 package net.sourceforge.ganttproject.application;
 
 import biz.ganttproject.LoggerApi;
-import biz.ganttproject.app.InternationalizationKt;
+import biz.ganttproject.app.InternationalizationCoreKt;
 import biz.ganttproject.storage.AutoSaveKt;
 import kotlin.Unit;
 import net.sourceforge.ganttproject.AppBuilder;
 import net.sourceforge.ganttproject.GPLogger;
 import net.sourceforge.ganttproject.GPVersion;
 import net.sourceforge.ganttproject.GanttProject;
-import net.sourceforge.ganttproject.document.DocumentCreator;
 import net.sourceforge.ganttproject.export.CommandLineExportApplication;
 import org.eclipse.core.runtime.IPlatformRunnable;
 
@@ -75,7 +74,7 @@ public class MainApplication implements IPlatformRunnable {
             var toolkit = Toolkit.getDefaultToolkit();
             var awtAppClassNameField = toolkit.getClass().getDeclaredField("awtAppClassName");
             awtAppClassNameField.setAccessible(true);
-            awtAppClassNameField.set(toolkit, InternationalizationKt.getRootLocalizer().formatText("appliTitle"));
+            awtAppClassNameField.set(toolkit, InternationalizationCoreKt.getRootLocalizer().formatText("appliTitle"));
           } catch (NoSuchFieldException | IllegalAccessException ex) {
             System.err.println("Can't set awtAppClassName (needed on Linux to show app name in the top panel)");
           }

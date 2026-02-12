@@ -22,9 +22,7 @@ import org.slf4j.LoggerFactory
 
 typealias LocalizerBuilderFn = LocalizerBuilder.()->Unit
 
-class LocalizerBuilder {
-  var currentLocalizer: Localizer = DummyLocalizer
-
+class LocalizerBuilder(var currentLocalizer: Localizer = DummyLocalizer) {
   fun build() = currentLocalizer
 
   fun default(withFallback: Boolean = true) {
@@ -86,8 +84,7 @@ class DebuggingLocalizer(private val id: String, private val delegate: Localizer
   override fun create(key: String): LocalizedString = LocalizedString(key, this)
 
   override fun formatTextOrNull(key: String, vararg args: Any): String? {
-    LOG.info("Searching for key={} in localizer={}", key, id)
-    println("Searching for key=${key} in localizer=${id}")
+    LOG.info("Searching for key={} in localizer={} ({})", key, id, delegate)
     return delegate.formatTextOrNull(key, args).also {
       println(".... result: $it")
     }

@@ -48,9 +48,7 @@ import net.sourceforge.ganttproject.document.ReadOnlyProxyDocument
 import net.sourceforge.ganttproject.document.webdav.WebDavServerDescriptor
 import net.sourceforge.ganttproject.gui.AuthenticationFlow
 import java.io.File
-import java.util.*
 import java.util.function.Consumer
-import kotlin.concurrent.schedule
 
 /**
  * @author dbarashev@bardsoftware.com

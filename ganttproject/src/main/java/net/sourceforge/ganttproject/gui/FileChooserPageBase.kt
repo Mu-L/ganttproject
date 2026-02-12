@@ -83,7 +83,7 @@ abstract class FileChooserPageBase protected constructor(
     get() = if (myDocument == null) "document.gan" else myDocument.getFileName()
 
 
-  override fun getTitle(): String? = pageTitle
+  override val title: String get() = pageTitle ?: ""
 
   fun tryChosenFile(file: File?) {
     myFileLabel.setOpaque(true)
@@ -96,7 +96,7 @@ abstract class FileChooserPageBase protected constructor(
     }
   }
 
-  override fun getComponent(): Component {
+  override val component: Component by lazy {
     val myComponent = JPanel(BorderLayout())
     chooser.setFileSelectionMode(this.fileChooserSelectionMode)
     val contentPanel: JComponent = JPanel(BorderLayout())
@@ -115,7 +115,7 @@ abstract class FileChooserPageBase protected constructor(
     contentPanel.add(fileBox, BorderLayout.NORTH)
     contentPanel.add(mySecondaryOptionsComponent, BorderLayout.CENTER)
     myComponent.add(contentPanel, BorderLayout.NORTH)
-    return myComponent
+    myComponent
   }
 
   protected open fun loadPreferences() {

@@ -18,9 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 package net.sourceforge.ganttproject.export;
 
-import biz.ganttproject.core.option.DefaultEnumerationOption;
-import biz.ganttproject.core.option.GPOption;
-import biz.ganttproject.core.option.GPOptionGroup;
+import biz.ganttproject.core.option.*;
 import biz.ganttproject.impex.csv.GanttCSVExport;
 import biz.ganttproject.impex.csv.SpreadsheetFormat;
 import biz.ganttproject.impex.csv.SpreadsheetWriter;
@@ -37,18 +35,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class ExporterToCSV extends ExporterBase {
-  static class FormatOption extends DefaultEnumerationOption<SpreadsheetFormat> {
-    FormatOption() {
-      super("impex.csv.format", SpreadsheetFormat.values());
-      setSelectedValue(SpreadsheetFormat.CSV);
-    }
-  }
-
-  private final FormatOption myFormatOption = new FormatOption();
+  private final ExportFileFormatOption<SpreadsheetFormat> myFormatOption = new ExportFileFormatOption<>("impex.csv.format", SpreadsheetFormat.CSV, Arrays.stream(SpreadsheetFormat.values()).toList());
 
 
   private final GPOptionGroup myOptions = new GPOptionGroup("impex.csv", new GPOption[]{myFormatOption});

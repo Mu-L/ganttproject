@@ -20,7 +20,7 @@ package biz.ganttproject.impex.ical;
 
 import biz.ganttproject.LoggerApi;
 import biz.ganttproject.app.DefaultLocalizer;
-import biz.ganttproject.app.InternationalizationKt;
+import biz.ganttproject.app.InternationalizationCoreKt;
 import biz.ganttproject.core.calendar.CalendarEvent;
 import net.fortuna.ical4j.data.ParserException;
 import net.sourceforge.ganttproject.GPLogger;
@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class IcsFileImporter extends ImporterBase {
   private static final LoggerApi LOGGER = GPLogger.create("Import.Ics");
-  private static final DefaultLocalizer ourLocalizer = InternationalizationKt.getRootLocalizer();
+  private static final DefaultLocalizer ourLocalizer = InternationalizationCoreKt.getRootLocalizer();
   private CalendarEditorPage myEditorPage;
 
   public IcsFileImporter() {

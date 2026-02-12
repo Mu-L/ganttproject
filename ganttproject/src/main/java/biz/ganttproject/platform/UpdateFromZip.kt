@@ -18,9 +18,9 @@
  */
 package biz.ganttproject.platform
 
-import biz.ganttproject.app.FileExtensionFilter
 import biz.ganttproject.app.Localizer
 import biz.ganttproject.app.PropertySheetBuilder
+import biz.ganttproject.core.option.FileExtensionFilter
 import biz.ganttproject.core.option.ObservableFile
 import biz.ganttproject.core.option.ObservableString
 import biz.ganttproject.core.option.ValidationException

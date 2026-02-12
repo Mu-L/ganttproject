@@ -28,9 +28,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
-import net.sourceforge.ganttproject.document.Document
 import java.time.Instant
-import java.util.*
 import java.util.function.Consumer
 
 /**

@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 package net.sourceforge.ganttproject.client;
 
-import biz.ganttproject.app.InternationalizationKt;
+import biz.ganttproject.app.InternationalizationCoreKt;
 import biz.ganttproject.core.option.DateOption;
 import biz.ganttproject.core.option.DefaultBooleanOption;
 import biz.ganttproject.core.option.DefaultDateOption;
@@ -146,7 +146,7 @@ public class RssFeedChecker {
     if (CheckOption.UNDEFINED == checkOption) {
 //      myCheckRssOption.setValue(CheckOption.YES.toString());
       getNotificationManager().addNotifications(Collections.singletonList(getNotificationManager().createNotification(
-        NotificationChannel.RSS, "News and Updates", InternationalizationKt.getRootLocalizer().formatText("updateRss.message"), NotificationManager.DEFAULT_HYPERLINK_LISTENER
+        NotificationChannel.RSS, "News and Updates", InternationalizationCoreKt.getRootLocalizer().formatText("updateRss.message"), NotificationManager.DEFAULT_HYPERLINK_LISTENER
       )));
     } else {
       readRss();

@@ -274,7 +274,7 @@ class UIFacadeImpl extends ProgressProvider implements UIFacade {
 
   @Override
   public void showOptionDialog(int messageType, String message, Action[] actions) {
-    var i18n = InternationalizationKt.getRootLocalizer();
+    var i18n = InternationalizationCoreKt.getRootLocalizer();
     FXUtil.INSTANCE.runLater(() -> {
       Alert alert = null;
       var alertType = messageType & ~(HTML_MESSAGE_FORMAT | MARKDOWN_MESSAGE_FORMAT);
@@ -385,7 +385,7 @@ class UIFacadeImpl extends ProgressProvider implements UIFacade {
     getNotificationManager().addNotifications(Collections.singletonList(getNotificationManager().createNotification(
       channel,
       i18n(i18nPrefix + "itemTitle"),
-      InternationalizationKt.getRootLocalizer().formatText(i18nPrefix + "itemBody", message),
+      InternationalizationCoreKt.getRootLocalizer().formatText(i18nPrefix + "itemBody", message),
       e -> {
         if (e.getEventType() != EventType.ACTIVATED) {
           return;

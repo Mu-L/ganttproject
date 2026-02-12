@@ -29,7 +29,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.embed.swing.SwingNode
 import javafx.event.ActionEvent
 import javafx.scene.control.Button
-import javafx.scene.control.Label
 import javafx.scene.layout.StackPane
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -178,21 +177,32 @@ private class WizardUiFx(private val ctrl: DialogController, private val model: 
 
     titleString.update(page.title)
     //, i18n.formatText("step"), model.currentPage + 1, i18n.formatText("of"), pages.size
-    val swingNode = SwingNode()
-    coroutineScope.launch {
-      withContext(Dispatchers.Swing) {
-        swingNode.content = page.component as JComponent
+    val fxNode = page.fxComponent
+    if (fxNode == null) {
+      val swingNode = SwingNode()
+      coroutineScope.launch {
+        withContext(Dispatchers.Swing) {
+          swingNode.content = page.component as JComponent
+        }
+        withContext(Dispatchers.JavaFx) {
+          //borderPane.center = swingNode
+          FXUtil.transitionNode(stackPane, {
+            stackPane.children.clear()
+            stackPane.children.add(swingNode)
+          }, {
+            ctrl.resize()
+            adjustButtonState()
+          })
+        }
       }
-      withContext(Dispatchers.JavaFx) {
-        //borderPane.center = swingNode
-        FXUtil.transitionNode(stackPane, {
-          stackPane.children.clear()
-          stackPane.children.add(swingNode)
-        }, {
-          ctrl.resize()
-          adjustButtonState()
-        })
-      }
+    } else {
+      FXUtil.transitionNode(stackPane, {
+        stackPane.children.clear()
+        stackPane.children.add(fxNode)
+      }, {
+        ctrl.resize()
+        adjustButtonState()
+      })
     }
   }
 

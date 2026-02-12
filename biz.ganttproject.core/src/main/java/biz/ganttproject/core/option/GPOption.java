@@ -52,4 +52,7 @@ public interface GPOption<T> {
   @Nullable ValueValidator<T> getValidator();
 
   void setValidator(ValueValidator<T> validator);
+
+  default void visitPropertyPaneBuilder(PropertyPaneBuilder builder) {
+  }
 }

@@ -21,6 +21,7 @@ package net.sourceforge.ganttproject.language;
 
 import biz.ganttproject.app.FormatterBasedDateConverter;
 import biz.ganttproject.app.InternationalizationImplKt;
+import biz.ganttproject.app.InternationalizationCoreKt;
 import biz.ganttproject.app.InternationalizationKt;
 import biz.ganttproject.core.option.GPAbstractOption;
 import biz.ganttproject.core.time.CalendarFactory;
@@ -324,7 +325,7 @@ public class GanttLanguage {
 
   /** @return the text in the current language for the given key */
   public String getText(String key) {
-    return InternationalizationKt.getRootLocalizer().formatTextOrNull(key);
+    return InternationalizationCoreKt.getRootLocalizer().formatTextOrNull(key);
   }
 
   /**
@@ -370,6 +371,6 @@ public class GanttLanguage {
   }
 
   public String formatText(String key, Object... values) {
-    return InternationalizationKt.getRootLocalizer().formatText(key, values);
+    return InternationalizationCoreKt.getRootLocalizer().formatText(key, values);
   }
 }

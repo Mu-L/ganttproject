@@ -18,13 +18,10 @@ along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
 */
 package biz.ganttproject.storage
 
-import biz.ganttproject.FXUtil
 import biz.ganttproject.app.RootLocalizer
-import biz.ganttproject.app.dialog
 import biz.ganttproject.app.dialogFx
 import biz.ganttproject.storage.cloud.GPCloudStorageOptions
 import javafx.application.Platform
-import javafx.scene.control.Button
 import javafx.stage.Window
 import net.sourceforge.ganttproject.IGanttProject
 import net.sourceforge.ganttproject.action.GPAction
@@ -32,8 +29,6 @@ import net.sourceforge.ganttproject.document.DocumentManager
 import net.sourceforge.ganttproject.gui.ProjectUIFacade
 import net.sourceforge.ganttproject.gui.UIUtil
 import java.awt.event.ActionEvent
-import java.util.*
-import kotlin.concurrent.schedule
 
 /**
  * @author dbarashev@bardsoftware.com

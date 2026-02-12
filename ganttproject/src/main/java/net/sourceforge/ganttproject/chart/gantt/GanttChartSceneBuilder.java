@@ -18,7 +18,7 @@ along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
  */
 package net.sourceforge.ganttproject.chart.gantt;
 
-import biz.ganttproject.app.InternationalizationKt;
+import biz.ganttproject.app.InternationalizationCoreKt;
 import biz.ganttproject.core.calendar.GPCalendarCalc;
 import biz.ganttproject.core.chart.canvas.Canvas;
 import biz.ganttproject.core.chart.canvas.Canvas.Polygon;
@@ -111,7 +111,7 @@ public class GanttChartSceneBuilder {
       if (customProperty != null) {
         return customProperty.getName();
       }
-      return InternationalizationKt.getRootLocalizer().formatText(OptionsPageBuilder.I18N.getCanonicalOptionValueLabelKey(id));
+      return InternationalizationCoreKt.getRootLocalizer().formatText(OptionsPageBuilder.I18N.getCanonicalOptionValueLabelKey(id));
     }));
 
     input.getCustomPropertyManager().addListener(event -> {

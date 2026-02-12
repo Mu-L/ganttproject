@@ -32,6 +32,12 @@ public class DefaultEnumerationOption<T> extends GPAbstractOption<String> implem
     reloadValues(Arrays.asList(values));
   }
 
+  public DefaultEnumerationOption(String id, List<T> values) {
+    super(id);
+    myValues = new ArrayList<>();
+    reloadValues(values);
+  }
+
   protected void reloadValues(List<T> values) {
     List<String> oldValues = new ArrayList<>(myValues);
     myValues.clear();

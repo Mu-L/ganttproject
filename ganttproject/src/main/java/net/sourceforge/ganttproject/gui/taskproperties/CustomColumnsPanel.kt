@@ -59,7 +59,6 @@ import javafx.util.converter.DefaultStringConverter
 import net.sourceforge.ganttproject.action.GPAction
 import net.sourceforge.ganttproject.language.GanttLanguage
 import net.sourceforge.ganttproject.storage.ProjectDatabase
-import net.sourceforge.ganttproject.task.TaskMutator
 import net.sourceforge.ganttproject.undo.GPUndoManager
 import org.controlsfx.control.tableview2.TableColumn2
 import org.controlsfx.control.tableview2.TableView2

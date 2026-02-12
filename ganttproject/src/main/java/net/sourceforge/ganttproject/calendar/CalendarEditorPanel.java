@@ -20,8 +20,7 @@ along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
 package net.sourceforge.ganttproject.calendar;
 
 import biz.ganttproject.app.DialogKt;
-import biz.ganttproject.app.InternationalizationKt;
-import biz.ganttproject.app.LocalizedString;
+import biz.ganttproject.app.InternationalizationCoreKt;
 import biz.ganttproject.core.calendar.CalendarEvent;
 import biz.ganttproject.core.calendar.GPCalendar;
 import biz.ganttproject.core.option.DefaultColorOption;
@@ -299,7 +298,7 @@ public class CalendarEditorPanel {
     AbstractTableAndActionsComponent<CalendarEvent> tableAndActions = new AbstractTableAndActionsComponent<>(table) {
       @Override
       protected void onAddEvent() {
-        var title = InternationalizationKt.getRootLocalizer().formatText("calendar.editor.datePickerDialog.title");
+        var title = InternationalizationCoreKt.getRootLocalizer().formatText("calendar.editor.datePickerDialog.title");
         DialogKt.dialog(title, "calendar.event.add", controller -> {
           controller.addStyleSheet("/biz/ganttproject/app/Dialog.css");
           controller.addStyleSheet("/biz/ganttproject/lib/MultiDatePicker.css");
@@ -311,7 +310,7 @@ public class CalendarEditorPanel {
 
           controller.setupButton(ButtonType.APPLY, button -> {
             button.getStyleClass().add("btn-attention");
-            button.setText(InternationalizationKt.getRootLocalizer().formatText("add"));
+            button.setText(InternationalizationCoreKt.getRootLocalizer().formatText("add"));
             button.setOnAction(event -> {
               var selectedDates = multiDatePicker.getSelectedDates();
               SwingUtilities.invokeLater(() -> {

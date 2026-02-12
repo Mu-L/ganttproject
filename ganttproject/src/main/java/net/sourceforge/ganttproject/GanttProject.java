@@ -770,6 +770,7 @@ public class GanttProject extends GanttProjectBase implements ResourceView, Gant
   }
   @Override
   public void refresh() {
+    getTaskFilterManager().refresh();
     getViewManager().refresh();
     //++super.repaint();
   }

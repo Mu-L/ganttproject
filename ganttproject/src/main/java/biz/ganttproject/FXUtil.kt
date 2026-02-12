@@ -18,6 +18,7 @@ along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
 */
 package biz.ganttproject
 
+import biz.ganttproject.app.FXThread
 import biz.ganttproject.app.applicationFont
 import biz.ganttproject.app.getGlyphIcon
 import javafx.animation.FadeTransition
@@ -47,54 +48,20 @@ interface FxUiComponent {
  * @author dbarashev@bardsoftware.com
  */
 object FXUtil {
-  private var isJavaFxAvailable: Boolean? = null
   fun runLater(delayMs: Long, code: ()->Unit) {
-    fxScope.launch {
-      delay(delayMs)
-      runLater { code() }
-    }
+    FXThread.runLater(delayMs, code)
   }
   fun runLater(code: () -> Unit) {
-    val javafxOk = isJavaFxAvailable ?: run {
-      try {
-        Platform.runLater {}
-        true
-      } catch (ex: java.lang.IllegalStateException) {
-        false
-      }
-    }
-    isJavaFxAvailable = javafxOk
-    if (javafxOk) {
-      if (Platform.isFxApplicationThread()){
-        code()
-      } else {
-        Platform.runLater(code)
-      }
-    } else {
-      code()
-    }
+    FXThread.runLater(code)
   }
-
   fun launchFx(code: suspend ()->Unit) {
-    GlobalScope.launch(Dispatchers.JavaFx) {
+    fxScope.launch {
       code()
     }
   }
 
   fun startup(code: () -> Unit) {
-    val javafxOk = isJavaFxAvailable ?: run {
-      try {
-        Platform.runLater {}
-        true
-      } catch (ex: java.lang.IllegalStateException) {
-        false
-      }
-    }
-    if (javafxOk) {
-      Platform.runLater(code)
-    } else {
-      Platform.startup(code)
-    }
+    FXThread.startup(code)
   }
   /*
   public static Label createHtmlLabel(String htmlContent, String css) {

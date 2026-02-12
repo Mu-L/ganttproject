@@ -22,7 +22,6 @@ import biz.ganttproject.core.option.*;
 import biz.ganttproject.impex.csv.GanttCSVExport;
 import biz.ganttproject.impex.csv.SpreadsheetFormat;
 import biz.ganttproject.impex.csv.SpreadsheetWriter;
-import kotlin.Unit;
 import net.sourceforge.ganttproject.GPLogger;
 import net.sourceforge.ganttproject.GanttProject;
 import net.sourceforge.ganttproject.io.CSVOptions;
@@ -36,28 +35,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class ExporterToCSV extends ExporterBase {
-  static class FormatOption extends DefaultEnumerationOption<SpreadsheetFormat> {
-    private ObservableEnum<SpreadsheetFormat> observable = new ObservableEnum<>("impex.csv.format", SpreadsheetFormat.CSV, SpreadsheetFormat.values());
-    FormatOption() {
-      super("impex.csv.format", SpreadsheetFormat.values());
-      setSelectedValue(SpreadsheetFormat.CSV);
-      observable.addWatcher(evt -> {
-        setSelectedValue(evt.getNewValue());
-        return Unit.INSTANCE;
-      });
-    }
-
-    @Override
-    public void visitPropertyPaneBuilder(PropertyPaneBuilder builder) {
-      builder.dropdown(observable, null);
-    }
-  }
-
-  private final FormatOption myFormatOption = new FormatOption();
+  private final ExportFileFormatOption<SpreadsheetFormat> myFormatOption = new ExportFileFormatOption<>("impex.csv.format", SpreadsheetFormat.CSV, Arrays.stream(SpreadsheetFormat.values()).toList());
 
 
   private final GPOptionGroup myOptions = new GPOptionGroup("impex.csv", new GPOption[]{myFormatOption});

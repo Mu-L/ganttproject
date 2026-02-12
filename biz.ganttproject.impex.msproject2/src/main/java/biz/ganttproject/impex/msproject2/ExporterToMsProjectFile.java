@@ -27,6 +27,7 @@ import net.sf.mpxj.ProjectFile;
 import net.sf.mpxj.mpx.MPXWriter;
 import net.sf.mpxj.mspdi.MSPDIWriter;
 import net.sf.mpxj.writer.ProjectWriter;
+import net.sourceforge.ganttproject.export.ExportFileFormatOption;
 import net.sourceforge.ganttproject.export.ExporterBase;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -43,22 +44,8 @@ import java.util.List;
  */
 public class ExporterToMsProjectFile extends ExporterBase {
 
-  private static final String[] FILE_FORMAT_IDS = new String[] { "impex.msproject.fileformat.mpx",
-      "impex.msproject.fileformat.mspdi" };
-
-  private static final String[] FILE_EXTENSIONS = new String[] { "mpx", "xml" };
-
-  private String myFileFormat = FILE_FORMAT_IDS[0];
-
-  private final EnumerationOption myFileFormatOption = new DefaultEnumerationOption<Object>("impex.msproject.fileformat",
-      FILE_FORMAT_IDS) {
-    @Override
-    public void commit() {
-      super.commit();
-      ExporterToMsProjectFile.this.myFileFormat = getValue();
-    }
-  };
-
+  private final ExportFileFormatOption<MsProjectFileFormat> myFileFormatOption = new ExportFileFormatOption(
+    "impex.msproject.fileformat", MsProjectFileFormat.MPX, Arrays.stream(MsProjectFileFormat.values()).toList());
   private final LocaleOption myLanguageOption = new LocaleOption();
 
   private final GPOptionGroup myOptions = new GPOptionGroup("exporter.msproject", new GPOption[] { myFileFormatOption });
@@ -68,9 +55,6 @@ public class ExporterToMsProjectFile extends ExporterBase {
   public ExporterToMsProjectFile() {
     myOptions.setTitled(false);
     myMPXOptions.setTitled(false);
-    myFileFormatOption.lock();
-    myFileFormatOption.setValue(FILE_FORMAT_IDS[0]);
-    myFileFormatOption.commit();
     myLanguageOption.setSelectedLocale(language.getLocale());
   }
 
@@ -86,7 +70,7 @@ public class ExporterToMsProjectFile extends ExporterBase {
 
   @Override
   public List<GPOptionGroup> getSecondaryOptions() {
-    return FILE_FORMAT_IDS[0].equals(myFileFormat) ? Collections.singletonList(myMPXOptions)
+    return myFileFormatOption.getSelectedValue() == MsProjectFileFormat.MPX ? Collections.singletonList(myMPXOptions)
         : Collections.<GPOptionGroup> emptyList();
   }
 
@@ -97,18 +81,13 @@ public class ExporterToMsProjectFile extends ExporterBase {
 
   @Override
   public String getFileNamePattern() {
-    return myFileFormat;
+    return myFileFormatOption.getSelectedValue().getExtension();
   }
 
   @Override
   protected void setFormat(String format) {
-    for (int i = 0; i < FILE_EXTENSIONS.length; i++) {
-      if (FILE_EXTENSIONS[i].equalsIgnoreCase(format)) {
-        myFileFormatOption.setValue(FILE_FORMAT_IDS[i]);
-        myFileFormatOption.commit();
-        break;
-      }
-    }
+    MsProjectFileFormat.getEntries().stream().filter( f -> f.getExtension().equalsIgnoreCase(format))
+      .findFirst().ifPresent(myFileFormatOption::setSelectedValue);
   }
 
   @Override
@@ -140,14 +119,14 @@ public class ExporterToMsProjectFile extends ExporterBase {
   }
 
   private ProjectWriter createProjectWriter() {
-    if (FILE_FORMAT_IDS[0].equals(myFileFormat)) {
+    if (myFileFormatOption.getSelectedValue() == MsProjectFileFormat.MPX) {
       MPXWriter result = new MPXWriter();
       if (myLanguageOption.getSelectedLocale() != null) {
         result.setLocale(myLanguageOption.getSelectedLocale());
       }
       return result;
     }
-    if (FILE_FORMAT_IDS[1].equals(myFileFormat)) {
+    if (myFileFormatOption.getSelectedValue() == MsProjectFileFormat.MSPDI) {
       return new MSPDIWriter();
     }
     assert false : "Should not be here";
@@ -160,17 +139,11 @@ public class ExporterToMsProjectFile extends ExporterBase {
   }
 
   private String getSelectedFormatExtension() {
-    for (int i = 0; i < FILE_FORMAT_IDS.length; i++) {
-      if (myFileFormat.equals(FILE_FORMAT_IDS[i])) {
-        return FILE_EXTENSIONS[i];
-      }
-    }
-    throw new IllegalStateException("Selected format=" + myFileFormat + " has not been found in known formats:"
-        + Arrays.asList(FILE_FORMAT_IDS));
+    return myFileFormatOption.getSelectedValue().getExtension();
   }
 
   @Override
   public String[] getFileExtensions() {
-    return FILE_EXTENSIONS;
+    return MsProjectFileFormat.getEntries().stream().map(MsProjectFileFormat::getExtension).toArray(String[]::new);
   }
 }

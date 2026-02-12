@@ -101,8 +101,10 @@ class ObservableString(
 class ObservableBoolean(id: String, initValue: Boolean = false)
   : ObservableProperty<Boolean>(id,initValue)
 
-class ObservableEnum<E : Enum<E>>(id: String, initValue: E, val allValues: Array<E>)
-  : ObservableProperty<E>(id,initValue)
+class ObservableEnum<E : Enum<E>>(id: String, initValue: E, val allValues: List<E>)
+  : ObservableProperty<E>(id,initValue) {
+  constructor(id: String, initValue: E, allValues: Array<E>) : this(id, initValue, allValues.toList())
+}
 
 class ObservableChoice<T>(id: String, initValue: T, val allValues: List<T>, val converter: StringConverter<T>)
   : ObservableProperty<T>(id, initValue)

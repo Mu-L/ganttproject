@@ -22,27 +22,37 @@ import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import biz.ganttproject.core.option.*;
+import javafx.util.StringConverter;
+import kotlin.Unit;
 import net.sourceforge.ganttproject.IGanttProject;
 import net.sourceforge.ganttproject.export.ExporterBase;
 import net.sourceforge.ganttproject.gui.UIFacade;
 
 import org.osgi.service.prefs.Preferences;
 
-import biz.ganttproject.core.option.DefaultEnumerationOption;
-import biz.ganttproject.core.option.EnumerationOption;
-import biz.ganttproject.core.option.GPOption;
-import biz.ganttproject.core.option.GPOptionGroup;
-
 public abstract class StylesheetExporterBase extends ExporterBase {
 
   private GPOptionGroup myOptions;
 
   protected EnumerationOption createStylesheetOption(String optionID, final List<Stylesheet> stylesheets) {
+    var converter = new StringConverter<Stylesheet>() {
+      @Override
+      public String toString(Stylesheet object) {
+        return object.getLocalizedName();
+      }
+
+      @Override
+      public Stylesheet fromString(String string) {
+        return stylesheets.stream().filter(s -> s.getLocalizedName().equals(string)).findFirst().orElse(null);
+      }
+    };
+    var observable = new ObservableChoice<>(optionID, stylesheets.get(0), stylesheets, converter);
     final List<String> names = new ArrayList<String>();
     for (Stylesheet s : stylesheets) {
       names.add(s.getLocalizedName());
     }
-    EnumerationOption stylesheetOption = new DefaultEnumerationOption<Stylesheet>(optionID, stylesheets.toArray(new Stylesheet[0])) {
+    EnumerationOption stylesheetOption = new DefaultEnumerationOption<>(optionID, stylesheets.toArray(new Stylesheet[0])) {
       @Override
       public void commit() {
         super.commit();
@@ -55,14 +65,25 @@ public abstract class StylesheetExporterBase extends ExporterBase {
 
       @Override
       protected String objectToString(Stylesheet obj) {
-        return obj.getLocalizedName();
+        return converter.toString(obj);
       }
 
       @Override
       protected Stylesheet stringToObject(String value) {
-        return getTypedValues().stream().filter(s -> s.getLocalizedName().equals(value)).findFirst().orElse(null);
+        return converter.fromString(value);
+      }
+
+      @Override
+      public void visitPropertyPaneBuilder(PropertyPaneBuilder builder) {
+        builder.dropdown(observable, null);
       }
     };
+
+    observable.addWatcher(evt -> {
+      stylesheetOption.setValue(evt.getNewValue().getLocalizedName());
+      return Unit.INSTANCE;
+    });
+
     return stylesheetOption;
   }
 

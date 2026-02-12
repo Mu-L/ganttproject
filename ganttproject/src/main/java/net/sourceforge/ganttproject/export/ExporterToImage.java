@@ -18,10 +18,7 @@ along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
  */
 package net.sourceforge.ganttproject.export;
 
-import biz.ganttproject.core.option.EnumerationOption;
-import biz.ganttproject.core.option.GPAbstractOption;
-import biz.ganttproject.core.option.GPOption;
-import biz.ganttproject.core.option.GPOptionGroup;
+import biz.ganttproject.core.option.*;
 import net.sourceforge.ganttproject.chart.Chart;
 import net.sourceforge.ganttproject.language.GanttLanguage;
 import org.eclipse.core.runtime.IStatus;
@@ -36,97 +33,34 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * @author bard
  */
 public class ExporterToImage extends ExporterBase {
 
-  static class FileTypeOption extends GPAbstractOption<String> implements EnumerationOption {
-    static final String[] FILE_FORMAT_ID = new String[] { "impex.image.fileformat.png", "impex.image.fileformat.jpeg" };
+  private final ExportFileFormatOption<ImageFileFormat> myFileTypeOption =
+    new ExportFileFormatOption<>("impex.image.fileformat", ImageFileFormat.PNG, Arrays.stream(ImageFileFormat.values()).toList());
 
-    static final String[] FILE_EXTENSION = new String[] { "png", "jpg" };
-
-    // TODO GPAbstractOption already has this field, why add it again?!
-    private String myValue = FileTypeOption.FILE_FORMAT_ID[0];
-    private Function<String, String> myValueLocalizer = null;
-
-    FileTypeOption() {
-      super("impex.image.fileformat");
-    }
-
-    @Override
-    public String[] getAvailableValues() {
-      return FileTypeOption.FILE_FORMAT_ID;
-    }
-
-    @Override
-    public void setValueLocalizer(Function<String, String> localizer) {
-      myValueLocalizer = localizer;
-    }
-
-    @Override
-    public Function<String, String> getValueLocalizer() {
-      return myValueLocalizer;
-    }
-
-    @Override
-    public void setValue(String value) {
-      myValue = value;
-    }
-
-    @Override
-    public String getValue() {
-      return myValue;
-    }
-
-    String proposeFileExtension() {
-      for (int i = 0; i < FileTypeOption.FILE_FORMAT_ID.length; i++) {
-        if (myValue.equals(FileTypeOption.FILE_FORMAT_ID[i])) {
-          return FileTypeOption.FILE_EXTENSION[i];
-        }
-      }
-      throw new IllegalStateException("Selected format=" + myValue + " has not been found in known formats:"
-          + Arrays.asList(FileTypeOption.FILE_FORMAT_ID));
-    }
-
-    @Override
-    public String getPersistentValue() {
-      return null;
-    }
-
-    @Override
-    public void loadPersistentValue(String value) {
-    }
-
-    @Override
-    public boolean isChanged() {
-      return false;
-    }
-  }
-
-  private final FileTypeOption myFileTypeOption = new FileTypeOption();
-
-  private final GPOptionGroup myOptions = new GPOptionGroup("impex.image", new GPOption[] { myFileTypeOption });
+  private final GPOptionGroup myOptions = new GPOptionGroup("impex.image", myFileTypeOption);
 
   public ExporterToImage() {
     myOptions.setTitled(false);
   }
 
+  private String getSelectedFormatExtension() {
+    return myFileTypeOption.getSelectedValue().getExtension();
+  }
   @Override
   protected void setFormat(String format) {
-    for (int i = 0; i < FileTypeOption.FILE_EXTENSION.length; i++) {
-      if (FileTypeOption.FILE_EXTENSION[i].equalsIgnoreCase(format)) {
-        myFileTypeOption.setValue(FileTypeOption.FILE_FORMAT_ID[i]);
-      }
-    }
+    ImageFileFormat.getEntries().stream().filter( f -> f.getExtension().equalsIgnoreCase(format))
+      .findFirst().ifPresent(myFileTypeOption::setSelectedValue);
   }
 
   @Override
   public String getFileTypeDescription() {
     return MessageFormat.format(GanttLanguage.getInstance().getText("impex.image.description"),
-        new Object[] { proposeFileExtension() });
+      proposeFileExtension());
   }
 
   @Override
@@ -175,7 +109,7 @@ public class ExporterToImage extends ExporterBase {
         RenderedImage renderedImage = chart.asPrintChartApi().exportChart(
             exportSettings.getStartDate(), exportSettings.getEndDate(), zoomLevel, exportSettings.isCommandLineMode());
         try {
-          ImageIO.write(renderedImage, myFileTypeOption.proposeFileExtension(), outputFile);
+          ImageIO.write(renderedImage, getSelectedFormatExtension(), outputFile);
         } catch (IOException e) {
           getUIFacade().showErrorDialog(e);
           return Status.CANCEL_STATUS;
@@ -188,11 +122,11 @@ public class ExporterToImage extends ExporterBase {
 
   @Override
   public String proposeFileExtension() {
-    return myFileTypeOption.proposeFileExtension();
+    return getSelectedFormatExtension();
   }
 
   @Override
   public String[] getFileExtensions() {
-    return FileTypeOption.FILE_EXTENSION;
+    return ImageFileFormat.getEntries().stream().map(ImageFileFormat::getExtension).toArray(String[]::new);
   }
 }

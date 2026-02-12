@@ -1,3 +1,4 @@
+
 package net.sourceforge.ganttproject.export
 
 import biz.ganttproject.app.*
@@ -49,9 +50,13 @@ private val propertyLocalizer = i18n {
     fallback {
       default()
       transform {
-        val replaced = if (it.contains("format.value")) it.replace("format.value", "fileformat") else it
+        val replaced =
+          if (it.contains(".format.value")) it.replace(".format.value", ".fileformat")
+          else if (it.contains("fileformat.value")) it.replace(".value", "")
+          else it
         "optionValue.$replaced.label"
       }
+      //debug("exporter.dropdown.value")
     }
   }
 }

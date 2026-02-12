@@ -472,7 +472,9 @@ class PropertyPaneBuilderImpl(private val localizer: Localizer, private val grid
     val options: PropertyDisplayOptions<*>?
   ): RowBuilder {
     private fun createLabel(item: OptionRowBuilder): Label {
-      return Label(item.label)
+      return Label(item.label).also {
+        it.styleClass.add("label")
+      }
     }
 
     override fun build(grid: GridPane, idx: Int): Int {

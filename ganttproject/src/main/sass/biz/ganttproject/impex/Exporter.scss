@@ -68,12 +68,17 @@
     .btn-option {
       -fx-padding: 1em 0 0 1em;
       -fx-border-color: yellow;
-      -fx-border-width: 1;
+      -fx-border-width: 0;
     }
     .property-pane {
-      -fx-padding: -1em 4em;
+      -fx-padding: -1em 0 1em 3em;
       -fx-border-color: red;
       -fx-border-width: 0;
+
+      .label {
+        -fx-min-width: 8em;
+        -fx-alignment: center-right;
+      }
     }
   }
 }

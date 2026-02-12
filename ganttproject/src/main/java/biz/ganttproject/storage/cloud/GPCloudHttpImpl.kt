@@ -35,7 +35,6 @@ import javafx.collections.ObservableList
 import javafx.concurrent.Service
 import javafx.concurrent.Task
 import kotlinx.coroutines.*
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.sourceforge.ganttproject.GPLogger
 import net.sourceforge.ganttproject.GPVersion

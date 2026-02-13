@@ -40,7 +40,6 @@ import javax.swing.filechooser.FileFilter
  * Base class for the file chooser pages in the Import and Export wizards.
  */
 abstract class FileChooserPageBase protected constructor(
-  protected val preferences: Preferences,
   private val myDocument: Document?,
   uiFacade: UIFacade?,
   val fileChooserTitle: String?,
@@ -52,6 +51,9 @@ abstract class FileChooserPageBase protected constructor(
       tryChosenFile(file)
     }
   }
+
+  abstract val preferences: Preferences
+
   private val myOptionsBuilder: OptionsPageBuilder = OptionsPageBuilder().also {
     it.i18N = object : OptionsPageBuilder.I18N() {
       protected override fun hasValue(key: String): Boolean {

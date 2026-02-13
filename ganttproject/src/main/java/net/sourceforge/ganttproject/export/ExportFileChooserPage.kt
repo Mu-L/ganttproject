@@ -43,10 +43,10 @@ import javax.swing.filechooser.FileFilter
 internal class ExportFileChooserPage(
   private val myState: ExportFileWizardImpl.State,
   private val myProject: IGanttProject,
-  prefs: Preferences,
+  override val preferences: Preferences,
   uiFacade: UIFacade?
 ) : FileChooserPageBase(
-  prefs, myProject.document, uiFacade,
+  myProject.document, uiFacade,
   fileChooserTitle = i18n.formatText("selectFileToExport"),
   fileChooserSelectionMode = JFileChooser.FILES_AND_DIRECTORIES,
   pageTitle = i18n.formatText("selectFileToExport")

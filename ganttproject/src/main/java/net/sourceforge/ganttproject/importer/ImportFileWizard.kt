@@ -18,7 +18,7 @@
  */
 package net.sourceforge.ganttproject.importer
 
-import biz.ganttproject.app.RootLocalizer
+import biz.ganttproject.app.*
 import biz.ganttproject.core.option.GPOptionGroup
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -26,7 +26,6 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
-import javafx.scene.control.Label
 import net.sourceforge.ganttproject.IGanttProject
 import net.sourceforge.ganttproject.filter.ExtensionBasedFileFilter
 import net.sourceforge.ganttproject.gui.FileChooserPageBase
@@ -34,7 +33,7 @@ import net.sourceforge.ganttproject.gui.UIFacade
 import net.sourceforge.ganttproject.gui.projectwizard.WizardModel
 import net.sourceforge.ganttproject.gui.projectwizard.WizardPage
 import net.sourceforge.ganttproject.gui.projectwizard.showWizard
-import net.sourceforge.ganttproject.plugins.PluginManager.*
+import net.sourceforge.ganttproject.plugins.PluginManager.getExtensions
 import org.osgi.service.prefs.Preferences
 import java.awt.Component
 import java.io.File
@@ -52,7 +51,7 @@ class ImportFileWizard(uiFacade: UIFacade, project: IGanttProject, pluginPrefere
     filePage.selectedFileProperty.addListener { _, _, _ ->
       wizardModel.needsRefresh.set(true, this)
     }
-    wizardModel.addPage(ImporterChooserPage(importers, uiFacade, pluginPreferences, wizardModel))
+    wizardModel.addPage(ImporterChooserPageFx(importers, wizardModel))
     wizardModel.addPage(filePage)
     wizardModel.customPageProperty.addListener { _, oldValue, newValue ->
       if (oldValue == null && newValue != null) {
@@ -68,6 +67,9 @@ class ImportFileWizard(uiFacade: UIFacade, project: IGanttProject, pluginPrefere
   }
 }
 
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
 /**
  * Model for the import wizard, managing importer and file selection.
  */
@@ -78,6 +80,7 @@ class ImporterWizardModel: WizardModel() {
       field = value
       customPageProperty.set(null)
       value?.customPage?.let { customPageProperty.set(it) }
+      needsRefresh.set(true, this)
     }
 
   // Selected file.
@@ -105,36 +108,57 @@ private fun getImporters(): MutableList<Importer> {
   return getExtensions(Importer.EXTENSION_POINT_ID, Importer::class.java)
 }
 
-private class ImporterChooserPageFx(
-  importers: List<Importer>,
-  uiFacade: UIFacade,
-  pluginPreferences: Preferences,
-  wizardModel: ImporterWizardModel
-) : WizardPage {
-  override val title: String = i18n.formatText("importerChooserPageTitle")
-  override val component: Component?
-    get() = null
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
+/**
+ * The first page in the import wizard that allows the user to choose an importer.
+ */
+private class ImporterChooserPageFx(importers: List<Importer>, model: ImporterWizardModel) : WizardPage {
+  override val title: String = RootLocalizer.formatText("importerChooserPageTitle")
+
+  private val titles = importers.flatMapIndexed { index, importer -> listOf(
+    "title.$index" to { LocalizedString(importer.fileTypeDescription, DummyLocalizer)},
+    "title.$index.help" to { LocalizedString("", DummyLocalizer)}
+  )}.toMap()
+
+  override val fxComponent: Node? by lazy {
+    val optionPaneBuilder = OptionPaneBuilder<Importer>().apply {
+      this.i18n = MappingLocalizer(titles, DummyLocalizer::create)
+      this.styleClass = "exporter-chooser-page"
+      elements = importers.mapIndexed { index, importer ->
+        OptionElementData("title.${index}", importer, isSelected = (index == 0),
+          customContent = null)
+      }
+      onSelect = { model.importer = it }
+    }
+    optionPaneBuilder.buildPane()
+  }
+
+  override val component: Component? = null
 
   override fun setActive(b: Boolean) {
   }
-
-  override val fxComponent: Node by lazy {
-    Label("foo")
-  }
 }
+
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
 /**
  * Wizard page for choosing a file to import from.
  */
 private class ImportFileChooserPage(
-  private val state: ImporterWizardModel, project: IGanttProject, prefs: Preferences, uiFacade: UIFacade)
-  : FileChooserPageBase(prefs, project.document, uiFacade, fileChooserTitle = "",
+  private val state: ImporterWizardModel, project: IGanttProject, private val prefs: Preferences, uiFacade: UIFacade)
+  : FileChooserPageBase(project.document, uiFacade, fileChooserTitle = "",
   pageTitle = i18n.formatText("importerFileChooserPageTitle")) {
 
   val importer get() = state.importer
 
+  override val preferences: Preferences get() = prefs.node(state.importer?.id ?: "")
+
   init {
     hasOverwriteOption = false
-    selectedFileProperty.addListener { value, file, newValue ->
+    selectedFileProperty.addListener { _, _, newValue ->
       state.file = newValue
     }
   }
@@ -143,7 +167,6 @@ private class ImportFileChooserPage(
     importer?.let {
       return ExtensionBasedFileFilter(it.getFileNamePattern(), it.getFileTypeDescription())
     }
-
 
   override val optionGroups: List<GPOptionGroup> = emptyList()
 

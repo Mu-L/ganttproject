@@ -51,6 +51,7 @@ class ImportFileWizard(uiFacade: UIFacade, project: IGanttProject, pluginPrefere
     filePage.selectedFileProperty.addListener { _, _, _ ->
       wizardModel.needsRefresh.set(true, this)
     }
+    wizardModel.importer = importers.firstOrNull()
     wizardModel.addPage(ImporterChooserPageFx(importers, wizardModel))
     wizardModel.addPage(filePage)
     wizardModel.customPageProperty.addListener { _, oldValue, newValue ->
@@ -137,8 +138,7 @@ private class ImporterChooserPageFx(importers: List<Importer>, model: ImporterWi
 
   override val component: Component? = null
 
-  override fun setActive(b: Boolean) {
-  }
+  override fun setActive(b: Boolean) {}
 }
 
 // --------------------------------------------------------------------------------------------------------------------

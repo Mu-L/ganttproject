@@ -76,6 +76,9 @@ public class ExportFileWizardImpl {
     }
 
     var fileChooserPage = new ExportFileChooserPage(myState, myProject, exportNode, uiFacade);
+    fileChooserPage.getSelectedFileProperty().addListener( (observable, oldValue, newValue) -> {
+      wizardModel.getNeedsRefresh().set(true, this);
+    });
     wizardModel.addPage(new ExporterChooserPageFx(ourExporters, myState));
     wizardModel.addPage(fileChooserPage);
     wizardModel.setOnOk(() -> {

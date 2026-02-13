@@ -60,7 +60,9 @@ class ExporterChooserPageFx(exporters: List<Exporter>, private val model: State)
   }
 
   override fun setActive(b: Boolean) {
-
+    if (!b) {
+      model.exporter.options.commit()
+    }
   }
 }
 

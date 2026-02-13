@@ -60,7 +60,10 @@ internal class ExportFileChooserPage(
     proposeChosenFile = {
       proposeOutputFile(myProject, myState.exporter) ?: File(defaultFileName)
     }
-    overwriteOption.addChangeValueListener { tryChosenFile(myState.file) }
+    overwriteOption.addChangeValueListener { tryChosenFile(chooser.file) }
+    selectedFileProperty.addListener { _, _, newValue ->
+      myState.file = newValue
+    }
   }
 
   override fun validateFile(file: File?): Result<File, String> {

@@ -131,7 +131,7 @@ var DEFAULT_TRANSLATION_LOCALIZER: Localizer = DummyLocalizer
  */
 open class DefaultLocalizer(
     private val rootKey: String = "",
-    private val baseLocalizer: Localizer = DEFAULT_TRANSLATION_LOCALIZER,
+    private val baseLocalizer: ()->Localizer = { DEFAULT_TRANSLATION_LOCALIZER },
     private val prefixedLocalizer: Localizer? = null,
     private val currentTranslation: SimpleObjectProperty<Translation?> = SimpleObjectProperty(null)) : Localizer {
 
@@ -156,7 +156,7 @@ open class DefaultLocalizer(
       this.currentTranslation.value?.let { tr ->
         tr.mapKey(prefixedKey)?.let { value ->
           MessageFormat.format(value, *args)
-        } ?: this.baseLocalizer.formatTextOrNull(key, *args)
+        } ?: this.baseLocalizer().formatTextOrNull(key, *args)
       }
     } catch (ex: MissingResourceException) {
       null
@@ -167,7 +167,7 @@ open class DefaultLocalizer(
    * Creates a new localizer which uses this one as "prefixed" with the given prefix.
    */
   fun createWithRootKey(rootKey: String, baseLocalizer: Localizer = DummyLocalizer): DefaultLocalizer =
-      DefaultLocalizer(rootKey, baseLocalizer, this, this.currentTranslation)
+      DefaultLocalizer(rootKey, {baseLocalizer}, this, this.currentTranslation)
 }
 
 /**
@@ -209,7 +209,7 @@ class MappingLocalizer(val key2lambda: Map<String, ()->LocalizedString?>, val un
 /**
  * Localizer which always uses the given resource bundle.
  */
-class SingleTranslationLocalizer(val bundle: Translation) : DefaultLocalizer(currentTranslation = SimpleObjectProperty(bundle), baseLocalizer = DummyLocalizer)
+class SingleTranslationLocalizer(val bundle: Translation) : DefaultLocalizer(currentTranslation = SimpleObjectProperty(bundle), baseLocalizer = {DummyLocalizer})
 
 
 val ourCurrentTranslation: SimpleObjectProperty<Translation?> = SimpleObjectProperty(null)
@@ -218,7 +218,7 @@ var RootLocalizer : DefaultLocalizer = DefaultLocalizer(currentTranslation = our
 }
 
 fun createDefaultLocalizer(fallback: Localizer): DefaultLocalizer {
-  return DefaultLocalizer(baseLocalizer = fallback, currentTranslation = ourCurrentTranslation)
+  return DefaultLocalizer(baseLocalizer = {fallback}, currentTranslation = ourCurrentTranslation)
 }
 
 /**

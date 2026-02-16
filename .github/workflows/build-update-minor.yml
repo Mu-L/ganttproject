@@ -2,10 +2,10 @@ name: Build Minor Update
 
 on:
     push:
-        branches: ['BRANCH*']
+        branches: ['BRANCH*', 'master']
         paths: ['ganttproject-builder/BUILD-HISTORY-MINOR']
 env:
-    MAJOR_VERSION: 3.3
+    MAJOR_VERSION: 3.4
 
 jobs:
     Linux:

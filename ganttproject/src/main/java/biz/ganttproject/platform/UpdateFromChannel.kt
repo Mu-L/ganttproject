@@ -182,20 +182,22 @@ internal class UpdateComponentUi(ourLocalizer: Localizer, update: UpdateMetadata
 }
 
 internal fun createGridPane(ourLocalizer: Localizer, model: UpdateDialogModel) = GridPane().apply {
+  vgap = 5.0
   styleClass.add("props")
   add(Label(ourLocalizer.formatText("installedVersion")).also {
-    GridPane.setMargin(it, Insets(5.0, 10.0, 3.0, 0.0))
+    GridPane.setMargin(it, Insets(15.0, 10.0, 3.0, 0.0))
   }, 0, 0)
   add(Label(model.installedVersion).also {
-    GridPane.setMargin(it, Insets(5.0, 0.0, 3.0, 0.0))
+    GridPane.setMargin(it, Insets(15.0, 0.0, 3.0, 0.0))
   }, 1, 0)
   add(Label(ourLocalizer.formatText("checkUpdates")).also {
-    GridPane.setMargin(it, Insets(5.0, 10.0, 3.0, 0.0))
+    GridPane.setMargin(it, Insets(15.0, 10.0, 3.0, 0.0))
   }, 0, 1)
   val toggleSwitch = createToggleSwitch().also {
     it.selectedProperty().value = UpdateOptions.isCheckEnabled.value
     it.selectedProperty().addListener { _, _, newValue -> UpdateOptions.isCheckEnabled.value = newValue }
   }
+  GridPane.setMargin(toggleSwitch, Insets(15.0, 0.0, 3.0, 0.0))
   add(toggleSwitch, 1, 1)
   add(HyperlinkLabel(ourLocalizer.formatText("checkUpdates.helpline")).also {
     it.styleClass.add("helpline")

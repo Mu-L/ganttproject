@@ -283,6 +283,7 @@ class PropertyPaneBuilderImpl(private val localizer: Localizer, private val grid
           fileChooser.extensionFilters.add(FileChooser.ExtensionFilter(filter.description, filter.extensions))
         }
       }
+
       val resultFile = fileChooser.showOpenDialog(null)
       option.value = resultFile
       resultFile?.let {
@@ -295,6 +296,8 @@ class PropertyPaneBuilderImpl(private val localizer: Localizer, private val grid
       onClick = { onBrowse() },
       styleClass = "btn"
     )
+    textField.id = option.id
+    displayOptions?.editorStyles?.let(textField.styleClass::addAll)
     return textField
 //    return HBox().apply {
 //      HBox.setHgrow(textField, Priority.ALWAYS)

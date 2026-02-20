@@ -37,7 +37,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException
 
 const val PRIVACY_URL = "https://www.ganttproject.biz/about/privacy"
-
+const val MINOR_UPDATES_URL = "https://www.ganttproject.biz/download/updates"
 fun checkAvailableUpdates(updater: Updater, uiFacade: UIFacade) {
   if (UpdateOptions.isCheckEnabled.value) {
     LOG.debug("Fetching updates from {}", UpdateOptions.updateUrl.value)
@@ -100,7 +100,7 @@ internal class UpdateDialog(private val model: UpdateDialogModel) {
   init {
     model.localizer = ourLocalizer
     model.stateProperty.subscribe { oldValue, newValue ->
-      if ((oldValue == ApplyAction.INSTALL_FROM_CHANNEL || oldValue == ApplyAction.DOWNLOAD_MAJOR) && newValue == ApplyAction.INSTALL_FROM_ZIP) {
+      if ((oldValue == ApplyAction.INSTALL_FROM_CHANNEL || oldValue == ApplyAction.DOWNLOAD_MAJOR || oldValue == ApplyAction.UP_TO_DATE) && newValue == ApplyAction.INSTALL_FROM_ZIP) {
         FXUtil.transitionCenterPane(dialogContent, installFromZipUi.node, dialogApi::resize)
       }
       if (oldValue == ApplyAction.INSTALL_FROM_ZIP && (newValue == ApplyAction.INSTALL_FROM_CHANNEL || newValue == ApplyAction.DOWNLOAD_MAJOR)) {
@@ -128,7 +128,7 @@ internal class UpdateDialog(private val model: UpdateDialogModel) {
     })
 
     if (model.state == ApplyAction.UP_TO_DATE) {
-      dialogApi.removeButtonBar()
+      //dialogApi.removeButtonBar()
     } else {
       dialogApi.setupButton(ButtonType.APPLY) { btn ->
         ButtonBar.setButtonUniformSize(btn, false)
@@ -146,13 +146,13 @@ internal class UpdateDialog(private val model: UpdateDialogModel) {
           btn.styleClass.add("btn")
           model.setupCloseButton(btn)
         }
-      } else {
-        dialogApi.setupButton(ButtonType("ZIP")) { btn ->
-          btn.maxWidth = Double.MAX_VALUE
-          btn.styleClass.addAll("btn", "btn-regular")
-          model.setupToggleSourceButton(btn)
-        }
       }
+    }
+    dialogApi.setupButton(ButtonType("ZIP")) { btn ->
+      btn.maxWidth = Double.MAX_VALUE
+      btn.styleClass.addAll("btn", "btn-regular")
+      model.setupToggleSourceButton(btn)
+      ButtonBar.setButtonUniformSize(btn, false)
     }
     dialogContent.center = installFromChannelUi.node
     dialogApi.setContent(dialogContent)

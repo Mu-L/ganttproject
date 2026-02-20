@@ -24,15 +24,18 @@ import biz.ganttproject.core.option.FileExtensionFilter
 import biz.ganttproject.core.option.ObservableFile
 import biz.ganttproject.core.option.ObservableString
 import biz.ganttproject.core.option.ValidationException
+import biz.ganttproject.lib.fx.openInBrowser
 import biz.ganttproject.lib.fx.vbox
 import biz.ganttproject.platform.PgpUtil.verifyFile
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.runCatching
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.event.EventHandler
 import javafx.scene.control.Label
 import javafx.scene.layout.HBox
 import javafx.scene.text.Text
+import org.controlsfx.control.HyperlinkLabel
 import java.io.File
 import org.eclipse.core.runtime.Platform as Eclipsito
 
@@ -47,17 +50,19 @@ class UpdateFromZip(localizer: Localizer) {
   private val fileOption = ObservableFile("zip.file")
   private val signatureOption = ObservableString("zip.signature", validator = {sigValue ->
     fileOption.value?.let {file ->
+      if (sigValue.isBlank()) throw ValidationException(localizer.formatText("zip.validation.signature.empty"))
       try {
         verifyFile(file, sigValue.byteInputStream())
         sigValue
       } catch (ex: Exception) {
-        throw ValidationException(localizer.formatText("validation.signature.mismatch"), ex)
+        throw ValidationException(localizer.formatText("zip.validation.signature.mismatch"), ex)
       }
-    } ?: throw ValidationException(localizer.formatText("validation.file.empty"))
+    } ?: throw ValidationException(localizer.formatText("zip.validation.file.empty"))
   })
 
   val propertySheet = PropertySheetBuilder(localizer).pane {
     file(fileOption) {
+      editorStyles.add("zip-file-chooser")
       extensionFilters.add(FileExtensionFilter(localizer.formatText("filterzip"), listOf("*.zip")))
     }
     text(signatureOption) {
@@ -68,16 +73,16 @@ class UpdateFromZip(localizer: Localizer) {
   val title = Label(paneTitle).apply {
     styleClass.add("title")
   }
-  val subtitle = Label("You can download and install update as ZIP file").apply {
-    styleClass.setAll("subtitle")
+  val subtitle = HyperlinkLabel(localizer.formatText("zip.title.helpline")).also {
+    it.styleClass.add("helpline")
+    it.onAction = EventHandler { openInBrowser(MINOR_UPDATES_URL) }
   }
-
   private val errorLabel = Text().also {
-    it.styleClass.addAll("hint", "hint-validation")
+    it.styleClass.addAll("alert-error")
     it.wrappingWidth = 400.0
   }
   private val errorPane = HBox().also {
-    it.styleClass.addAll("hint-validation-pane", "noerror")
+    it.styleClass.addAll("alert-embedded-box")
     it.children.add(errorLabel)
   }
 
@@ -105,10 +110,15 @@ class UpdateFromZip(localizer: Localizer) {
       } else {
         onError(propertySheet.validationErrors.values.joinToString(separator = "\n"))
       }
+      signatureOption.isWritable.value = fileOption.value?.exists() ?: false
     }
     signatureOption.addWatcher { updateDisable() }
-    fileOption.addWatcher { updateDisable() }
+    fileOption.addWatcher {
+      signatureOption.value = ""
+      updateDisable()
+    }
     propertySheet.validationErrors.subscribe { updateDisable() }
+    updateDisable()
   }
 
   internal fun installUpdate(): Result<File?, Throwable> {
@@ -128,6 +138,7 @@ class UpdateFromZip(localizer: Localizer) {
       add(title)
       add(subtitle)
       add(this@UpdateFromZip.propertySheet.node)
+      add(errorPane)
       setupValidation()
     }
   }

@@ -29,9 +29,10 @@
  This will show an error label with red borders from top and bottom and some vertical padding around.
  */
 @mixin error-embedded-box($color) {
-  -fx-border-width: 2 0 2 0;
-  -fx-padding: 0.75ex 0;
-  -fx-border-insets: 2ex 0;
-  -fx-background-insets: 2ex 0;
+  -fx-border-width: 0 0 0 5;
+  -fx-padding: 0.75ex 0.75ex;
+  -fx-border-insets: 2ex 1em;
+  -fx-background-insets: 2ex 1em;
   -fx-border-color: $color;
+  -fx-background-color: lighten($color, 10%);
 }

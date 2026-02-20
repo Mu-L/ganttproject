@@ -115,6 +115,7 @@ class UpdateDialogModel(
       when (value) {
         ApplyAction.UP_TO_DATE -> {
           btnApplyText.value = "NO ACTION"
+          btnToggleSourceText.value = localizer.formatText(Keys.INSTALL_FROM_ZIP)
         }
         ApplyAction.INSTALL_FROM_CHANNEL -> {
           btnApplyText.value = localizer.formatText(Keys.BUTTON_OK)
@@ -197,7 +198,7 @@ class UpdateDialogModel(
     button.textProperty().bind(btnToggleSourceText)
     button.addEventFilter(ActionEvent.ACTION) {
       it.consume()
-      if (state == ApplyAction.INSTALL_FROM_CHANNEL || state == ApplyAction.DOWNLOAD_MAJOR) {
+      if (state == ApplyAction.INSTALL_FROM_CHANNEL || state == ApplyAction.UP_TO_DATE || state == ApplyAction.DOWNLOAD_MAJOR) {
         state = ApplyAction.INSTALL_FROM_ZIP
       } else if (state == ApplyAction.INSTALL_FROM_ZIP) {
         state = ApplyAction.INSTALL_FROM_CHANNEL
@@ -278,6 +279,6 @@ const val UPGRADE_URL = "https://www.ganttproject.biz/download/upgrade"
 object UpdateDialogLocalizationKeys {
   internal const val MAJOR_UPDATE_DOWNLOAD = "majorUpdate.download"
   internal const val BUTTON_OK = "button.ok"
-  internal const val INSTALL_FROM_ZIP = "Install from ZIP"
-  internal const val INSTALL_FROM_CHANNEL = "Install from Update Channel"
+  internal const val INSTALL_FROM_ZIP = "toggleSource.zip"
+  internal const val INSTALL_FROM_CHANNEL = "toggleSource.channel"
 }

@@ -22,6 +22,7 @@
 @import "../app/errors";
 @import "../app/margins";
 @import "../app/validation";
+@import "../app/textfields.scss";
 
 @mixin titled-pane-title() {
   -fx-padding: 0 0 0 0.5em;
@@ -107,6 +108,11 @@
 
       .property-pane {
         @include vertical-space-top($vertical-space-medium);
+        .zip-file-chooser {
+          @include textfield-with-button($gp-light-gray, $gp-dark-gray);
+          -fx-border-color: green;
+          -fx-border-width: 0;
+        }
       }
       .apply-pane {
         @include vertical-space-top($vertical-space-small);
@@ -142,6 +148,14 @@
 
   .button-pane {
     @include dialog-button-pane();
+    -fx-background-color: transparent;
+    -fx-border-color: green;
+    -fx-border-width: 0;
+
+    .button-bar {
+      -fx-border-color: green;
+      -fx-border-width: 0;
+    }
   }
 
   .alert-embedded-box {

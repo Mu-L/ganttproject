@@ -20,11 +20,14 @@ package net.sourceforge.ganttproject.gui.taskproperties
 
 import javafx.collections.FXCollections
 import net.sourceforge.ganttproject.gui.UIFacade
+import net.sourceforge.ganttproject.resource.HumanResourceManager
+import net.sourceforge.ganttproject.roles.RoleManager
 import net.sourceforge.ganttproject.storage.ProjectDatabase
 import net.sourceforge.ganttproject.task.Task
 import net.sourceforge.ganttproject.task.TaskMutator
 
-class TaskPropertiesController(private val task: Task, private val projectDatabase: ProjectDatabase, private val uiFacade: UIFacade) {
+class TaskPropertiesController(private val task: Task, roleManager: RoleManager, resourceManager: HumanResourceManager,
+                               private val projectDatabase: ProjectDatabase, private val uiFacade: UIFacade) {
 
   val mainPropertiesPanel by lazy {
     MainPropertiesPanel(task, uiFacade.getCurrentTaskView()).also {
@@ -36,10 +39,19 @@ class TaskPropertiesController(private val task: Task, private val projectDataba
     }
   }
 
+  val predecessorsPanel by lazy {
+    TaskDependenciesPanelFx(task)
+  }
+
+  val resourcesPanel by lazy {
+    TaskResourcesPanel(task,  resourceManager, roleManager)
+  }
+
   val customPropertiesPanel by lazy {
     CustomColumnsPanel(task.manager.customPropertyManager, projectDatabase, CustomColumnsPanel.Type.TASK,
       uiFacade.undoManager, task.customValues.copyOf(), uiFacade.taskColumnList)
   }
+
 
   val validationErrors = FXCollections.observableArrayList<String>()
 
@@ -49,6 +61,8 @@ class TaskPropertiesController(private val task: Task, private val projectDataba
       customPropertiesPanel.save {
         mutator.setCustomProperties(it)
       }
+      predecessorsPanel.commit()
+      resourcesPanel.commit(mutator)
     }
 
   fun cancel() {

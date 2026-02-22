@@ -60,7 +60,7 @@ class InternationalizationTest {
           "hello" to "Hello, {0}"
       ))
     )
-    val i18n = DefaultLocalizer(baseLocalizer = fallbackLocalizer,
+    val i18n = DefaultLocalizer(baseLocalizer = {fallbackLocalizer},
       currentTranslation = newTranslation(mapOf(
           "world" to "World!"
       ))

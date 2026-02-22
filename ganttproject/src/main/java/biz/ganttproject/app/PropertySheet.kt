@@ -111,6 +111,12 @@ class PropertyPaneBuilderImpl(private val localizer: Localizer, private val grid
     })
   }
 
+  fun radio(property: ObservableBoolean) {
+    rowBuilders.add(run {
+      createOptionItem(property, createRadioButtonOptionEditor(property).component)
+    })
+  }
+
   fun date(property: ObservableDate, options: (DateDisplayOptions.()->Unit)? = null) {
     rowBuilders.add(run {
       val optionValues = options?.let { DateDisplayOptions(createDateConverter()).apply(it) } ?: DateDisplayOptions(createDateConverter())
@@ -204,6 +210,10 @@ class PropertyPaneBuilderImpl(private val localizer: Localizer, private val grid
       }
     }
 
+  }
+
+  fun createRadioButtonOptionEditor(option: ObservableBoolean): BooleanOptionRadioUi {
+    return BooleanOptionRadioUi(option, localizer)
   }
 
   private fun <E: Enum<E>> createEnumerationOptionEditor(
@@ -410,7 +420,7 @@ class PropertyPaneBuilderImpl(private val localizer: Localizer, private val grid
     }
   }
 
-  private fun createMoneyOptionEditor(property: ObservableMoney): Node {
+  fun createMoneyOptionEditor(property: ObservableMoney): Node {
     return TextField().also { textField ->
       val validatedText = textField.textProperty().validated(MoneyValidator)
       setupValidation(property, textField, validatedText)
@@ -661,4 +671,44 @@ object DoubleValidator: ValueValidator<Double> {
       ex.printStackTrace()
       throw ValidationException(ex)
     }
+}
+
+/**
+ * A JavaFX UI component for boolean options represented as radio buttons.
+ * Similar to OptionsPageBuilder.BooleanOptionRadioUi but for JavaFX.
+ */
+class BooleanOptionRadioUi(option: ObservableBoolean, localizer: Localizer) {
+  val yesButton = RadioButton(localizer.formatText("${option.id}.yes")).also { radio ->
+    radio.isSelected = option.value
+    radio.onAction = EventHandler {
+      if (!option.value) {
+        option.set(true, radio)
+      }
+    }
+  }
+
+  val noButton = RadioButton(localizer.formatText("${option.id}.no")).also { radio ->
+    radio.isSelected = !option.value
+    radio.onAction = EventHandler {
+      if (option.value) {
+        option.set(false, radio)
+      }
+    }
+  }
+
+  val component: Node
+    get() = VBox(5.0, yesButton, noButton)
+
+  init {
+    val toggleGroup = ToggleGroup()
+    yesButton.toggleGroup = toggleGroup
+    noButton.toggleGroup = toggleGroup
+
+    option.addWatcher { evt ->
+      if (evt.trigger != yesButton && evt.trigger != noButton) {
+        yesButton.isSelected = evt.newValue
+        noButton.isSelected = !evt.newValue
+      }
+    }
+  }
 }

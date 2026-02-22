@@ -32,13 +32,12 @@ import java.text.MessageFormat
 class GanttDialogProperties(private val tasks: Array<GanttTask?>) {
     fun show(project: IGanttProject, uiFacade: UIFacade) {
         val language = GanttLanguage.getInstance()
-        val taskPropertiesBean = GanttTaskPropertiesBean(tasks, project, uiFacade)
-        val taskPropertiesController = TaskPropertiesController(tasks[0]!!, project.projectDatabase, uiFacade)
+        val taskPropertiesController = TaskPropertiesController(tasks[0]!!, project.roleManager, project.humanResourceManager, project.projectDatabase, uiFacade)
 
         val okAction = OkAction.create("ok") {
             uiFacade.getUndoManager().undoableEdit(language.getText("properties.changed"), Runnable {
                 val mutator = taskPropertiesController.save()
-                taskPropertiesBean.save(mutator)
+                mutator.commit()
                 try {
                     project.taskManager.getAlgorithmCollection().recalculateTaskScheduleAlgorithm.run()
                 } catch (e: TaskDependencyException) {
@@ -73,8 +72,22 @@ class GanttDialogProperties(private val tasks: Array<GanttTask?>) {
               ))},
               { taskPropertiesController.mainPropertiesPanel.requestFocus() }
             ),
-            swingTab(language.getText("predecessors")) { taskPropertiesBean.predecessorsPanel },
-            swingTab(language.getText("human")) { taskPropertiesBean.resourcesPanel },
+            PropertiesDialogTabProvider(
+              { tabPane -> tabPane.tabs.add(Tab(
+                taskPropertiesController.predecessorsPanel.title,
+                taskPropertiesController.predecessorsPanel.fxComponent
+              ))},
+              { taskPropertiesController.predecessorsPanel.requestFocus() }
+            ),
+          PropertiesDialogTabProvider(
+            { tabPane -> tabPane.tabs.add(Tab(
+              taskPropertiesController.resourcesPanel.title,
+              taskPropertiesController.resourcesPanel.fxComponent
+            ))},
+            { taskPropertiesController.resourcesPanel.requestFocus() }
+          ),
+            //swingTab(language.getText("predecessors")) { taskPropertiesBean.predecessorsPanel },
+            //swingTab(language.getText("human")) { taskPropertiesBean.resourcesPanel },
             PropertiesDialogTabProvider(
                 { tabPane ->
                     tabPane.tabs.add(

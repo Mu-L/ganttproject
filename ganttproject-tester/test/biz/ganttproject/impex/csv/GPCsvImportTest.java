@@ -110,7 +110,7 @@ public class GPCsvImportTest extends TestCase {
         return GanttLanguage.getInstance().getText(key);
       }
     });
-    InternationalizationCoreKt.setRootLocalizer(new DefaultLocalizer("", DummyLocalizer.INSTANCE, null,
+    InternationalizationCoreKt.setRootLocalizer(new DefaultLocalizer("", ()->DummyLocalizer.INSTANCE, null,
       new SimpleObjectProperty(null)) {
       @Nullable
       @Override

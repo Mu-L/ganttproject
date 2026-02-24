@@ -20,26 +20,23 @@ package net.sourceforge.ganttproject.gui.taskproperties
 
 import biz.ganttproject.app.FXThread
 import biz.ganttproject.app.RootLocalizer
-import biz.ganttproject.createButton
-import biz.ganttproject.lib.fx.vbox
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
-import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.control.cell.ChoiceBoxTableCell
 import javafx.scene.control.cell.TextFieldTableCell
-import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
 import javafx.util.Callback
 import javafx.util.StringConverter
 import javafx.util.converter.DefaultStringConverter
-import net.sourceforge.ganttproject.action.GPAction
+import net.sourceforge.ganttproject.gui.AbstractTableAndActionsComponentFx
+import net.sourceforge.ganttproject.gui.TableActionsModel
 import net.sourceforge.ganttproject.task.Task
 import net.sourceforge.ganttproject.task.dependency.TaskDependency
 import net.sourceforge.ganttproject.task.dependency.TaskDependencyConstraint
@@ -54,13 +51,52 @@ import org.controlsfx.control.tableview2.TableView2
  * This class represents a JavaFX panel for managing task dependencies.
  */
 class TaskDependenciesPanelFx(private val task: Task) {
-  private val model = DependencyTableModel(task)
   private val tableItems: ObservableList<DependencyRow> = FXCollections.observableArrayList()
+  private val model = object : TableActionsModel<DependencyRow> {
+    private val innerModel = DependencyTableModel(task)
+
+    override fun getAllItems(): List<DependencyRow> = tableItems.toList()
+
+    override fun delete(indices: IntArray) {
+      innerModel.delete(indices)
+      refreshTable()
+    }
+
+    override fun onAdd() {
+      FXThread.runLater {
+        tableView.edit(tableItems.size - 1, tableView.columns[1])
+        tableView.selectionModel.select(tableItems.size - 1)
+      }
+    }
+
+    override fun refreshTable() {
+      val currentSelection = selectedRow
+      tableItems.clear()
+      // The last row is for adding new dependencies
+      val dependencies = innerModel.dependencies
+      dependencies.forEach { dep ->
+        tableItems.add(DependencyRow(dep))
+      }
+      tableItems.add(DependencyRow(null))
+      selectedRow = currentSelection
+    }
+
+    fun commit() {
+      innerModel.commit()
+    }
+
+    fun setValueAt(value: Any?, row: Int, col: Int) {
+      innerModel.setValueAt(value, row, col)
+    }
+  }
 
   val title: String = i18n.formatText("predecessors")
+  private val tableView = TableView2<DependencyRow>()
+  private val tableAndActions = AbstractTableAndActionsComponentFx(tableView, model)
+
   val fxComponent by lazy {
     getFxNode().also {
-      refreshTable()
+      model.refreshTable()
     }
   }
 
@@ -72,25 +108,8 @@ class TaskDependenciesPanelFx(private val task: Task) {
     get() = selectedIndices.firstOrNull() ?: -1
   private var selectRow: (Int) -> Unit = {}
 
-  private fun refreshTable() {
-    val currentSelection = selectedRow
-    tableItems.clear()
-    // The last row is for adding new dependencies
-    val dependencies = model.dependencies
-    dependencies.forEach { dep ->
-      tableItems.add(DependencyRow(dep))
-    }
-    tableItems.add(DependencyRow(null))
-    selectedRow = currentSelection
-  }
-
-  private fun getFxNode(): Region = BorderPane().apply {
-    stylesheets.add("/biz/ganttproject/task/TaskPropertiesDialog.css")
-    stylesheets.add("/biz/ganttproject/app/tables.css")
-    stylesheets.add("/biz/ganttproject/app/buttons.css")
-    styleClass.addAll("tab-contents", "pane-task-dependencies")
-
-    val tableView = TableView2<DependencyRow>().apply {
+  private fun getFxNode(): Region  {
+    tableView.apply {
       isEditable = true
       items = tableItems
       selectionModel.selectionMode = SelectionMode.SINGLE
@@ -115,11 +134,11 @@ class TaskDependenciesPanelFx(private val task: Task) {
           if (row.dependency == null) {
             if (newItem != null) {
               model.setValueAt(newItem, tableItems.size - 1, 1)
-              refreshTable()
+              model.refreshTable()
             }
           } else {
             model.setValueAt(newItem, event.tablePosition.row, 1)
-            refreshTable()
+            model.refreshTable()
           }
         }
         isEditable = true
@@ -141,7 +160,7 @@ class TaskDependenciesPanelFx(private val task: Task) {
         )
         setOnEditCommit { event ->
           model.setValueAt(event.newValue, event.tablePosition.row, 2)
-          refreshTable()
+          model.refreshTable()
         }
         isEditable = true
         prefWidth = 150.0
@@ -157,7 +176,7 @@ class TaskDependenciesPanelFx(private val task: Task) {
             model.setValueAt(event.newValue, event.tablePosition.row, 3)
           } catch (e: NumberFormatException) {
           }
-          refreshTable()
+          model.refreshTable()
         }
         isEditable = true
         prefWidth = 80.0
@@ -172,7 +191,7 @@ class TaskDependenciesPanelFx(private val task: Task) {
         )
         setOnEditCommit { event ->
           model.setValueAt(event.newValue, event.tablePosition.row, 4)
-          refreshTable()
+          model.refreshTable()
         }
         isEditable = true
         prefWidth = 100.0
@@ -180,49 +199,14 @@ class TaskDependenciesPanelFx(private val task: Task) {
 
       columns.addAll(idCol, nameCol, typeCol, lagCol, hardnessCol)
     }
-    this.center = tableView
-
-    // --------------------------------------------------------------------------
-    // Actions for adding and removing dependencies.
-    val actionAddRow = GPAction.create("add") {
-      FXThread.runLater {
-        tableView.edit(tableItems.size - 1, tableView.columns[1])
-        tableView.selectionModel.select(tableItems.size - 1)
-      }
-    }.also {
-      it.putValue(GPAction.TEXT_DISPLAY, ContentDisplay.TEXT_ONLY)
+    return tableAndActions.fxComponent.also {
+      it.stylesheets.addAll(
+        "/biz/ganttproject/task/TaskPropertiesDialog.css",
+        "/biz/ganttproject/app/tables.css",
+        "/biz/ganttproject/app/buttons.css"
+      )
+      it.styleClass.addAll("tab-contents", "pane-task-dependencies")
     }
-    val actionDeleteRow = GPAction.create("delete") {
-      FXThread.runLater {
-        if (selectedIndices.isNotEmpty()) {
-          model.delete(selectedIndices.toIntArray())
-          refreshTable()
-        }
-      }
-    }.also {
-      it.putValue(GPAction.TEXT_DISPLAY, ContentDisplay.TEXT_ONLY)
-    }
-
-    this.top = vbox {
-      add(HBox().also {
-        it.spacing = 5.0
-        it.children.add(createButton(actionAddRow, onlyIcon = false).also { btn ->
-          btn.styleClass.addAll("btn", "btn-regular", "secondary", "small")
-        })
-        it.children.add(createButton(actionDeleteRow, onlyIcon = false).also { btn ->
-          btn.styleClass.addAll("btn", "btn-regular", "secondary", "small")
-        })
-      })
-      add(HBox().also {
-        it.styleClass.add("medskip")
-      })
-    }
-
-    fun updateActions() {
-      actionDeleteRow.isEnabled = selectedRow >= 0 && selectedRow < tableItems.size - 1
-    }
-    selectedIndices.addListener(ListChangeListener { updateActions() })
-    updateActions()
   }
 
   fun commit() {
@@ -230,7 +214,7 @@ class TaskDependenciesPanelFx(private val task: Task) {
   }
 
   fun requestFocus() {
-    selectedRow = 0
+    tableAndActions.requestFocus()
   }
 }
 

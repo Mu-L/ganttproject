@@ -24,26 +24,23 @@ import biz.ganttproject.app.PropertyPaneBuilderImpl
 import biz.ganttproject.app.RootLocalizer
 import biz.ganttproject.core.option.ObservableBoolean
 import biz.ganttproject.core.option.ObservableMoney
-import biz.ganttproject.createButton
-import biz.ganttproject.lib.fx.vbox
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
-import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
+import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.control.cell.CheckBoxTableCell
 import javafx.scene.control.cell.ChoiceBoxTableCell
 import javafx.scene.control.cell.TextFieldTableCell
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.HBox
-import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.util.Callback
 import javafx.util.StringConverter
 import javafx.util.converter.DefaultStringConverter
-import net.sourceforge.ganttproject.action.GPAction
+import net.sourceforge.ganttproject.gui.AbstractTableAndActionsComponentFx
+import net.sourceforge.ganttproject.gui.TableActionsModel
 import net.sourceforge.ganttproject.resource.HumanResource
 import net.sourceforge.ganttproject.resource.HumanResourceManager
 import net.sourceforge.ganttproject.roles.Role
@@ -63,16 +60,55 @@ class TaskResourcesPanel(
   private val hrManager: HumanResourceManager,
   private val roleManager: RoleManager
 ) {
-  private val model = ResourceAssignmentTableModel(task)
   private val tableItems: ObservableList<ResourceAssignmentRow> = FXCollections.observableArrayList()
+  private val model = object : TableActionsModel<ResourceAssignmentRow> {
+    private val innerModel = ResourceAssignmentTableModel(task)
+
+    override fun getAllItems(): List<ResourceAssignmentRow> = tableItems.toList()
+
+    override fun delete(indices: IntArray) {
+      innerModel.delete(indices)
+      refreshTable()
+    }
+
+    override fun onAdd() {
+      FXThread.runLater {
+        tableView.edit(tableItems.size - 1, tableView.columns[1])
+        tableView.selectionModel.select(tableItems.size - 1)
+      }
+    }
+
+    override fun refreshTable() {
+      val currentSelection = selectedRow
+      tableItems.clear()
+      val assignments = innerModel.assignments
+      assignments.forEach { assignment ->
+        tableItems.add(ResourceAssignmentRow(assignment))
+      }
+      // The last row is for adding new assignments
+      tableItems.add(ResourceAssignmentRow(null))
+      selectedRow = currentSelection
+    }
+
+    fun commit() {
+      innerModel.commit()
+    }
+
+    fun setValueAt(value: Any?, row: Int, col: Int) {
+      innerModel.setValueAt(value, row, col)
+    }
+  }
 
   private val costIsCalculated = ObservableBoolean("option.taskProperties.cost.calculated.label", task.cost.isCalculated)
   private val costValue = ObservableMoney("option.taskProperties.cost.value", task.cost.value)
 
   val title: String = i18n.formatText("human")
+  private val tableView = TableView2<ResourceAssignmentRow>()
+  private val tableAndActions = AbstractTableAndActionsComponentFx(tableView, model)
+
   val fxComponent by lazy {
     getFxNode().also {
-      refreshTable()
+      model.refreshTable()
     }
   }
 
@@ -84,25 +120,8 @@ class TaskResourcesPanel(
     get() = selectedIndices.firstOrNull() ?: -1
   private var selectRow: (Int) -> Unit = {}
 
-  private fun refreshTable() {
-    val currentSelection = selectedRow
-    tableItems.clear()
-    val assignments = model.assignments
-    assignments.forEach { assignment ->
-      tableItems.add(ResourceAssignmentRow(assignment))
-    }
-    // The last row is for adding new assignments
-    tableItems.add(ResourceAssignmentRow(null))
-    selectedRow = currentSelection
-  }
-
-  private fun getFxNode(): Region = BorderPane().apply {
-    stylesheets.add("/biz/ganttproject/task/TaskPropertiesDialog.css")
-    stylesheets.add("/biz/ganttproject/app/tables.css")
-    stylesheets.add("/biz/ganttproject/app/buttons.css")
-    styleClass.addAll("tab-contents", "pane-task-resources")
-
-    val tableView = TableView2<ResourceAssignmentRow>().apply {
+  private fun getFxNode(): Node {
+    tableView.apply {
       isEditable = true
       items = tableItems
       selectionModel.selectionMode = SelectionMode.SINGLE
@@ -126,11 +145,11 @@ class TaskResourcesPanel(
           if (row.assignment == null) {
             if (newResource != null) {
               model.setValueAt(newResource, tableItems.size - 1, 1)
-              refreshTable()
+              model.refreshTable()
             }
           } else {
             model.setValueAt(newResource, event.tablePosition.row, 1)
-            refreshTable()
+            model.refreshTable()
           }
         }
         isEditable = true
@@ -146,7 +165,7 @@ class TaskResourcesPanel(
             model.setValueAt(event.newValue, event.tablePosition.row, 2)
           } catch (e: NumberFormatException) {
           }
-          refreshTable()
+          model.refreshTable()
         }
         isEditable = true
         prefWidth = 80.0
@@ -158,7 +177,7 @@ class TaskResourcesPanel(
         cellFactory = CheckBoxTableCell.forTableColumn(this)
         setOnEditCommit { event ->
           model.setValueAt(event.newValue, event.tablePosition.row, 3)
-          refreshTable()
+          model.refreshTable()
         }
         isEditable = true
         prefWidth = 100.0
@@ -179,7 +198,7 @@ class TaskResourcesPanel(
         )
         setOnEditCommit { event ->
           model.setValueAt(event.newValue, event.tablePosition.row, 4)
-          refreshTable()
+          model.refreshTable()
         }
         isEditable = true
         prefWidth = 150.0
@@ -189,57 +208,24 @@ class TaskResourcesPanel(
     }
 
     // Create split layout with table and cost panel
-    val mainContent = HBox().apply {
-      spacing = 10.0
-      children.addAll(
-        tableView.apply { HBox.setHgrow(this, Priority.SOMETIMES) },
-        createCostPanel().apply {
-          HBox.setHgrow(this, Priority.SOMETIMES)
-        }
-      )
+//    val mainContent = HBox().apply {
+//      spacing = 10.0
+//      children.addAll(
+//        tableView.apply { HBox.setHgrow(this, Priority.SOMETIMES) },
+//        createCostPanel().apply {
+//          HBox.setHgrow(this, Priority.SOMETIMES)
+//        }
+//      )
+//    }
+    val tableComponent = tableAndActions.fxComponent
+    return BorderPane().apply {
+      stylesheets.add("/biz/ganttproject/task/TaskPropertiesDialog.css")
+      stylesheets.add("/biz/ganttproject/app/tables.css")
+      stylesheets.add("/biz/ganttproject/app/buttons.css")
+      styleClass.addAll("tab-contents", "pane-task-resources")
+      center = tableComponent
+      right = createCostPanel()
     }
-    this.center = mainContent
-
-    // Actions for adding and removing assignments
-    val actionAddRow = GPAction.create("add") {
-      FXThread.runLater {
-        tableView.edit(tableItems.size - 1, tableView.columns[1])
-        tableView.selectionModel.select(tableItems.size - 1)
-      }
-    }.also {
-      it.putValue(GPAction.TEXT_DISPLAY, ContentDisplay.TEXT_ONLY)
-    }
-    val actionDeleteRow = GPAction.create("delete") {
-      FXThread.runLater {
-        if (selectedIndices.isNotEmpty()) {
-          model.delete(selectedIndices.toIntArray())
-          refreshTable()
-        }
-      }
-    }.also {
-      it.putValue(GPAction.TEXT_DISPLAY, ContentDisplay.TEXT_ONLY)
-    }
-
-    this.top = vbox {
-      add(HBox().also {
-        it.spacing = 5.0
-        it.children.add(createButton(actionAddRow, onlyIcon = false).also { btn ->
-          btn.styleClass.addAll("btn", "btn-regular", "secondary", "small")
-        })
-        it.children.add(createButton(actionDeleteRow, onlyIcon = false).also { btn ->
-          btn.styleClass.addAll("btn", "btn-regular", "secondary", "small")
-        })
-      })
-      add(HBox().also {
-        it.styleClass.add("medskip")
-      })
-    }
-
-    fun updateActions() {
-      actionDeleteRow.isEnabled = selectedRow >= 0 && selectedRow < tableItems.size - 1
-    }
-    selectedIndices.addListener(ListChangeListener { updateActions() })
-    updateActions()
   }
 
   private fun createCostPanel(): Region {

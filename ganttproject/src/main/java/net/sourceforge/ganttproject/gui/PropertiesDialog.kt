@@ -66,10 +66,10 @@ fun propertiesDialog(title: String, id: String, actions: List<GPAction>, validat
     dialogController.addStyleSheet("/biz/ganttproject/app/TabPane.css");
     dialogController.addStyleSheet("/biz/ganttproject/app/Util.css");
     dialogController.addStyleClass("dlg-lock");
-    var tabbedPane = TabPane();
-    tabbedPane.tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE;
+    val tabbedPane = TabPane();
+    tabbedPane.tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
 
-    var errorPane = ErrorPane();
+    val errorPane = ErrorPane();
 
     validationErrors.subscribe {
       val errors = validationErrors
@@ -99,5 +99,7 @@ fun propertiesDialog(title: String, id: String, actions: List<GPAction>, validat
       tabProviders.first().requestFocus()
       dialogController.resize()
     }
+
+    setupCode(dialogController)
   }
 }

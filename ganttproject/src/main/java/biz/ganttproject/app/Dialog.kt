@@ -787,6 +787,7 @@ fun main() {
         val dialog = Dialog<Unit>()
         dialog.initOwner(primaryStage)
         dialog.title = "Pure JavaFX Layout Test"
+        dialog.isResizable = true
 
         val pane = object : DialogPane() {
           override fun createButtonBar(): Node {
@@ -804,43 +805,54 @@ fun main() {
           }
         }
 
+        pane.content = StackPane().also {
+          it.children.add(HBox().also {
+            it.children.add(Label("This is a label"))
+            it.children.add(TextField().apply {
+              padding = Insets(20.0)
+            }.also {
+              HBox.setHgrow(it, Priority.ALWAYS)
+            })
+
+          })
+        }
 //        pane.content = Label("This dialog uses pure JavaFX components.\nCheck if the buttons below are clipped.").apply {
 //          padding = Insets(20.0)
-////          minWidth = 200.0
+//          minWidth = 200.0
 //        }
-        val swingNode = SwingNode()
-        SwingUtilities.invokeLater {
-          JPopupMenu.setDefaultLightWeightPopupEnabled(true);
-          swingNode.content = JComboBox(arrayOf("Alpha", "Beta", "Gamma", "Delta")).also { it ->
-            it.addPopupMenuListener(object: javax.swing.event.PopupMenuListener {
-              override fun popupMenuWillBecomeVisible(e: PopupMenuEvent) {
-
-                val combo = e.getSource() as JComboBox<*>;
-                val popup = combo.ui.getAccessibleChild(combo, 0) as? BasicComboPopup ?: return
-                popup.isLightWeightPopupEnabled = false
-//                SwingUtilities.invokeLater {
-//                  val p = combo.locationOnScreen
-//                  popup.setLocation((p.x * 1.5).toInt(), (1.5 * p.y).toInt() + combo.height)
-//                }
-              }
-
-              override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent?) {
-              }
-
-              override fun popupMenuCanceled(e: PopupMenuEvent?) {
-              }
-              // Implement other methods...
-            });
-          }
-
-        }
-        pane.content = swingNode
+//        val swingNode = SwingNode()
+//        SwingUtilities.invokeLater {
+//          JPopupMenu.setDefaultLightWeightPopupEnabled(true);
+//          swingNode.content = JComboBox(arrayOf("Alpha", "Beta", "Gamma", "Delta")).also { it ->
+//            it.addPopupMenuListener(object: javax.swing.event.PopupMenuListener {
+//              override fun popupMenuWillBecomeVisible(e: PopupMenuEvent) {
+//
+//                val combo = e.getSource() as JComboBox<*>;
+//                val popup = combo.ui.getAccessibleChild(combo, 0) as? BasicComboPopup ?: return
+//                popup.isLightWeightPopupEnabled = false
+////                SwingUtilities.invokeLater {
+////                  val p = combo.locationOnScreen
+////                  popup.setLocation((p.x * 1.5).toInt(), (1.5 * p.y).toInt() + combo.height)
+////                }
+//              }
+//
+//              override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent?) {
+//              }
+//
+//              override fun popupMenuCanceled(e: PopupMenuEvent?) {
+//              }
+//              // Implement other methods...
+//            });
+//          }
+//
+//        }
+//        pane.content = swingNode
 
         pane.buttonTypes.addAll(
           ButtonType.OK,
-          ButtonType.APPLY,
+          //ButtonType.APPLY,
           ButtonType.CANCEL,
-          ButtonType("Very Long Button Label")
+          //ButtonType("Very Long Button Label")
         )
 
         dialog.dialogPane = pane

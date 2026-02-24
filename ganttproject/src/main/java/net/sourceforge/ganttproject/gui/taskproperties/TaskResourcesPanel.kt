@@ -41,6 +41,7 @@ import javafx.util.StringConverter
 import javafx.util.converter.DefaultStringConverter
 import net.sourceforge.ganttproject.gui.AbstractTableAndActionsComponentFx
 import net.sourceforge.ganttproject.gui.TableActionsModel
+import net.sourceforge.ganttproject.gui.TableView2TableActionsModel
 import net.sourceforge.ganttproject.resource.HumanResource
 import net.sourceforge.ganttproject.resource.HumanResourceManager
 import net.sourceforge.ganttproject.roles.Role
@@ -61,10 +62,9 @@ class TaskResourcesPanel(
   private val roleManager: RoleManager
 ) {
   private val tableItems: ObservableList<ResourceAssignmentRow> = FXCollections.observableArrayList()
-  private val model = object : TableActionsModel<ResourceAssignmentRow> {
+  private val tableView = TableView2<ResourceAssignmentRow>()
+  private val model = object : TableView2TableActionsModel<ResourceAssignmentRow>(tableView) {
     private val innerModel = ResourceAssignmentTableModel(task)
-
-    override fun getAllItems(): List<ResourceAssignmentRow> = tableItems.toList()
 
     override fun delete(indices: IntArray) {
       innerModel.delete(indices)
@@ -103,7 +103,6 @@ class TaskResourcesPanel(
   private val costValue = ObservableMoney("option.taskProperties.cost.value", task.cost.value)
 
   val title: String = i18n.formatText("human")
-  private val tableView = TableView2<ResourceAssignmentRow>()
   private val tableAndActions = AbstractTableAndActionsComponentFx(tableView, model)
 
   val fxComponent by lazy {

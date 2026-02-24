@@ -37,6 +37,7 @@ import javafx.util.StringConverter
 import javafx.util.converter.DefaultStringConverter
 import net.sourceforge.ganttproject.gui.AbstractTableAndActionsComponentFx
 import net.sourceforge.ganttproject.gui.TableActionsModel
+import net.sourceforge.ganttproject.gui.TableView2TableActionsModel
 import net.sourceforge.ganttproject.task.Task
 import net.sourceforge.ganttproject.task.dependency.TaskDependency
 import net.sourceforge.ganttproject.task.dependency.TaskDependencyConstraint
@@ -52,10 +53,9 @@ import org.controlsfx.control.tableview2.TableView2
  */
 class TaskDependenciesPanelFx(private val task: Task) {
   private val tableItems: ObservableList<DependencyRow> = FXCollections.observableArrayList()
-  private val model = object : TableActionsModel<DependencyRow> {
+  private val tableView = TableView2<DependencyRow>()
+  private val model = object : TableView2TableActionsModel<DependencyRow>(tableView) {
     private val innerModel = DependencyTableModel(task)
-
-    override fun getAllItems(): List<DependencyRow> = tableItems.toList()
 
     override fun delete(indices: IntArray) {
       innerModel.delete(indices)
@@ -91,7 +91,6 @@ class TaskDependenciesPanelFx(private val task: Task) {
   }
 
   val title: String = i18n.formatText("predecessors")
-  private val tableView = TableView2<DependencyRow>()
   private val tableAndActions = AbstractTableAndActionsComponentFx(tableView, model)
 
   val fxComponent by lazy {

@@ -52,7 +52,6 @@ public class GanttDialogPerson {
   private ResourceAssignmentsPanel myAssignmentsPanel;
   private final MainPropertiesPanel mainPropertiesPanel;
   private final CustomColumnsPanel customColumnsPanel;
-  private DialogController myDialogController = null;
 
 
   public GanttDialogPerson(HumanResourceManager resourceManager,
@@ -75,6 +74,7 @@ public class GanttDialogPerson {
 
   public void setVisible(boolean isVisible) {
     if (isVisible) {
+      constructDaysOffPanel();
       OkAction okAction = new OkAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -107,9 +107,12 @@ public class GanttDialogPerson {
               return Unit.INSTANCE;
             }
           ),
-          PropertiesDialogKt.swingTab(
-            language.getText("daysOff"),
-            this::constructDaysOffPanel
+          new PropertiesDialogTabProvider(
+            tabPane -> {
+              tabPane.getTabs().add(new Tab(language.getText("daysOff"), new DateIntervalListEditorFx(myDaysOffModel)));
+              return Unit.INSTANCE;
+            },
+            () -> Unit.INSTANCE
           ),
           new PropertiesDialogTabProvider(tabPane -> {
             tabPane.getTabs().add(new Tab(customColumnsPanel.getTitle(), customColumnsPanel.getFxNode()));
@@ -126,7 +129,6 @@ public class GanttDialogPerson {
           )
         ),
         dialogController -> {
-          myDialogController = dialogController;
           return Unit.INSTANCE;
         }
       );
@@ -168,7 +170,7 @@ public class GanttDialogPerson {
 
   private DefaultDateIntervalModel myDaysOffModel;
 
-  public JPanel constructDaysOffPanel() {
+  private void constructDaysOffPanel() {
     myDaysOffModel = new DateIntervalListEditor.DefaultDateIntervalModel() {
       @Override
       public int getMaxIntervalLength() {
@@ -191,6 +193,5 @@ public class GanttDialogPerson {
       myDaysOffModel.add(DateIntervalListEditor.DateInterval.createFromModelDates(next.getStart().getTime(),
           next.getFinish().getTime()));
     }
-    return new DateIntervalListEditor(myDaysOffModel);
   }
 }

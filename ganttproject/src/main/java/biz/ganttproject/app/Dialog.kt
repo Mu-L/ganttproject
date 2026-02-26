@@ -28,7 +28,6 @@ import javafx.animation.FadeTransition
 import javafx.animation.ParallelTransition
 import javafx.animation.Transition
 import javafx.application.Platform
-import javafx.embed.swing.SwingNode
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Insets
@@ -39,6 +38,7 @@ import javafx.scene.effect.BoxBlur
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCombination
 import javafx.scene.input.KeyEvent
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.shape.Rectangle
 import javafx.stage.*
@@ -52,11 +52,7 @@ import net.sourceforge.ganttproject.action.GPAction
 import net.sourceforge.ganttproject.action.OkAction
 import net.sourceforge.ganttproject.gui.UIFacade
 import java.util.concurrent.CountDownLatch
-import javax.swing.JComboBox
-import javax.swing.JPopupMenu
 import javax.swing.SwingUtilities
-import javax.swing.event.PopupMenuEvent
-import javax.swing.plaf.basic.BasicComboPopup
 import kotlin.math.max
 
 /**
@@ -76,7 +72,7 @@ import kotlin.math.max
  *   this.dialogApi.showAlert(...)
  * }
  */
-fun dialogFx(title: String? = null, owner: Window? = DialogPlacement.applicationWindow, id: String? = null, contentBuilder: (DialogController) -> Unit) {
+fun dialogFx(title: String? = null, owner: Window? = null, id: String? = null, contentBuilder: (DialogController) -> Unit) {
   dialogFxBuild(owner, id,  contentBuilder).also {dlg ->
     title?.let { dlg.title = it }
     dlg.show()
@@ -85,9 +81,14 @@ fun dialogFx(title: String? = null, owner: Window? = DialogPlacement.application
 
 fun dialogFxBuild(owner: Window? = null, id: String? = null, contentBuilder: (DialogController) -> Unit): Dialog<Unit> =
   Dialog<Unit>().apply {
+    val newOwner = owner ?: dialogStack.lastOrNull()?.dialogPane?.scene?.window ?: DialogPlacement.applicationWindow
+    dialogStack.add(this)
     val dialogPaneExt = DialogPaneExt()
     dialogPane = dialogPaneExt
-    owner?.let(::initOwner)
+    if (newOwner != null) {
+      newOwner.let(::initOwner)
+      initModality(Modality.APPLICATION_MODAL)
+    }
     initModality(Modality.APPLICATION_MODAL)
 
     DialogControllerFx(dialogPaneExt, this).let { dialogBuildApi ->
@@ -110,13 +111,14 @@ fun dialogFxBuild(owner: Window? = null, id: String? = null, contentBuilder: (Di
             dialogPane.prefWidth = it.width
             dialogPane.prefHeight = it.height
           } ?: run {
-            owner?.let {
+            newOwner?.let {
               centerOnOwner(window, it)
             }
           }
           id?.let {
             window.onHiding = EventHandler {
               DialogPlacement.setBounds(id, Rectangle(window.x, window.y, window.width, window.height))
+              dialogStack.removeLast()
             }
           }
           window.onCloseRequest = EventHandler {
@@ -126,6 +128,7 @@ fun dialogFxBuild(owner: Window? = null, id: String? = null, contentBuilder: (Di
         }
       }
     }
+
 
     dialogPane.apply {
       styleClass.addAll("dlg")
@@ -164,6 +167,8 @@ class DialogPaneExt : DialogPane() {
     }
   }
 }
+
+private val dialogStack = mutableListOf<Dialog<*>>()
 fun dialog(title: String? = null,  id: String? = null, contentBuilder: (DialogController) -> Unit) {
   Platform.runLater {
     try {

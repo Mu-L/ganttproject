@@ -3,9 +3,42 @@
 
 
 .date-picker-popup {
-   //.left-button, .right-button, .left-arrow, .right-arrow {
-   //  @include btn-regular();
-   //}
+   -fx-effect: none;
+   .left-button, .right-button, .left-arrow, .right-arrow {
+     -fx-fill: black;
+     -fx-text-fill: black;
+     -fx-font-size: 150%;
+   }
+  .left-button, .right-button {
+    -fx-max-width: 1em;
+    -fx-max-height: 1em;
+    -fx-min-width: 1em;
+    -fx-min-height: 1em;
+    -fx-border-width: 1;
+    -fx-border-color: transparent;
+    &:hover, &:pressed {
+      -fx-background-color: transparent;
+      -fx-border-color: $gp-medium-gray;
+      -fx-border-width: 1;
+      -fx-border-radius: 50%;
+    }
+  }
+  * > .spinner > .button > .left-arrow {
+    -fx-background-insets: 0 0.05em 0 -0.05em;
+    -fx-padding: 0.3em 0.2em 0.3em 0.2em; /* 4 2 4 2 */
+    -fx-effect: none;
+    -fx-background-color: $gp-dark-gray;
+    &:hover, &:pressed {
+    }
+  }
+  * > .spinner > .button > .right-arrow {
+    -fx-background-insets: 0 -0.07em 0 0.07em;
+    -fx-padding: 0.3em 0.2em 0.3em 0.2em; /* 4 2 4 2 */
+    -fx-effect: none;
+    -fx-background-color: $gp-dark-gray;
+    &:hover, &:pressed {
+    }
+  }
    .edge-of-range {
      -fx-background-color: $gp-medium-gray;
      -fx-text-fill: whitesmoke;

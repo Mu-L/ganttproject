@@ -18,18 +18,14 @@ along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
 */
 package net.sourceforge.ganttproject.gui
 
-import biz.ganttproject.app.DialogController
-import biz.ganttproject.app.FXThread
-import biz.ganttproject.app.RootLocalizer
-import biz.ganttproject.app.dialog
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView
+import biz.ganttproject.app.*
 import javafx.collections.ObservableList
-import javafx.geometry.Pos
-import javafx.scene.control.*
+import javafx.scene.control.Button
+import javafx.scene.control.ButtonType
+import javafx.scene.control.ListCell
+import javafx.scene.control.ListView
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.layout.Region
 import net.sourceforge.ganttproject.calendar.MultiDatePicker
 import net.sourceforge.ganttproject.gui.DateIntervalListEditor.DateInterval
 import net.sourceforge.ganttproject.gui.DateIntervalListEditor.DateIntervalModel
@@ -125,13 +121,22 @@ class DateIntervalListEditorFx(private val model: DateIntervalModel) : HBox() {
 
 fun showDatePicker(addInterval: (DateInterval)->Unit) {
   val title = RootLocalizer.formatText("calendar.editor.datePickerDialog.title")
+  val multiDatePicker = MultiDatePicker()
+  multiDatePicker.value = LocalDate.now()
+
+  /*
+  // TODO: this is probably a better way, e.g. because it auto-hides
+  Popup().apply {
+    content.add(multiDatePicker.popupContent)
+    isAutoHide = true
+    show(dialogStack.lastOrNull()?.dialogPane?.scene?.window ?: DialogPlacement.applicationWindow)
+  }
+   */
   dialog(title, "calendar.event.add") { controller: DialogController ->
+    controller.frameStyle = FrameStyle.NO_FRAME
     controller.addStyleSheet("/biz/ganttproject/app/Dialog.css")
     controller.addStyleSheet("/biz/ganttproject/lib/MultiDatePicker.css")
     controller.addStyleClass("dlg")
-    val multiDatePicker = MultiDatePicker()
-    multiDatePicker.value = LocalDate.now()
-
     controller.setContent(multiDatePicker.popupContent)
 
     controller.setupButton(ButtonType.APPLY) { button: Button ->

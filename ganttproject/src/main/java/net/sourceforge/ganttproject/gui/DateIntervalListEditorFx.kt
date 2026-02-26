@@ -1,5 +1,5 @@
 /*
-Copyright 2026 BarD Software s.r.o, Alexander Popov
+Copyright 2026 BarD Software s.r.o, Alexander Popov, Dmitry Barashev
 
 This file is part of GanttProject, an open-source project management tool.
 

@@ -29,6 +29,7 @@ import net.sourceforge.ganttproject.action.OkAction;
 import net.sourceforge.ganttproject.gui.DateIntervalListEditor.DateInterval;
 import net.sourceforge.ganttproject.gui.DateIntervalListEditor.DefaultDateIntervalModel;
 import net.sourceforge.ganttproject.gui.resourceproperties.MainPropertiesPanel;
+import net.sourceforge.ganttproject.gui.resourceproperties.ResourceAssignmentsPanelFx;
 import net.sourceforge.ganttproject.gui.taskproperties.CustomColumnsPanel;
 import net.sourceforge.ganttproject.language.GanttLanguage;
 import net.sourceforge.ganttproject.resource.HumanResource;
@@ -49,7 +50,7 @@ public class GanttDialogPerson {
 
   private final UIFacade myUIFacade;
   private final Runnable onHide;
-  private ResourceAssignmentsPanel myAssignmentsPanel;
+  private ResourceAssignmentsPanelFx myAssignmentsPanel;
   private final MainPropertiesPanel mainPropertiesPanel;
   private final CustomColumnsPanel customColumnsPanel;
 
@@ -75,6 +76,7 @@ public class GanttDialogPerson {
   public void setVisible(boolean isVisible) {
     if (isVisible) {
       constructDaysOffPanel();
+      constructAssignmentsPanel();
       OkAction okAction = new OkAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -120,11 +122,14 @@ public class GanttDialogPerson {
           },
             () -> Unit.INSTANCE
           ),
-          PropertiesDialogKt.swingTab(
-            language.getText("assignments"),
+          new PropertiesDialogTabProvider(
+            tabPane -> {
+              tabPane.getTabs().add(new Tab(language.getText("assignments"), myAssignmentsPanel.getFxComponent()));
+              return Unit.INSTANCE;
+            },
             () -> {
-              constructAssignmentsPanel();
-              return myAssignmentsPanel.getComponent();
+              myAssignmentsPanel.requestFocus();
+              return Unit.INSTANCE;
             }
           )
         ),
@@ -136,7 +141,7 @@ public class GanttDialogPerson {
   }
 
   private void constructAssignmentsPanel() {
-    myAssignmentsPanel = new ResourceAssignmentsPanel(person, myTaskManager);
+    myAssignmentsPanel = new ResourceAssignmentsPanelFx(person, myTaskManager);
   }
 
   private void okButtonActionPerformed() {

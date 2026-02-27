@@ -183,6 +183,8 @@ public class HumanResource implements CustomPropertyHolder {
   }
 
   public void addDaysOff(GanttDaysOff gdo) {
+    System.out.println("add day off: " + gdo.getStart() + " - " + gdo.getFinish() + "");
+    resetLoads();
     myDaysOffList.addElement(gdo);
     fireResourceChanged();
   }

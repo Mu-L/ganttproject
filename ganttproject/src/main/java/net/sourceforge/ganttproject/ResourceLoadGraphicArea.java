@@ -31,6 +31,8 @@ import net.sourceforge.ganttproject.chart.mouse.MouseMotionListenerBase;
 import net.sourceforge.ganttproject.gui.zoom.ZoomManager;
 import net.sourceforge.ganttproject.language.GanttLanguage;
 import net.sourceforge.ganttproject.resource.HumanResource;
+import net.sourceforge.ganttproject.resource.ResourceEvent;
+import net.sourceforge.ganttproject.resource.ResourceView;
 import net.sourceforge.ganttproject.util.MouseUtil;
 
 import javax.swing.*;
@@ -61,6 +63,37 @@ public class ResourceLoadGraphicArea extends ChartComponentBase implements Resou
     zoomManager.addZoomListener(myViewState);
     zoomManager.addZoomListener(getZoomListener());
     initMouseListeners();
+    getProject().getHumanResourceManager().addView(new ResourceView() {
+      @Override
+      public void resourceAdded(ResourceEvent event) {
+
+      }
+
+      @Override
+      public void resourcesRemoved(ResourceEvent event) {
+
+      }
+
+      @Override
+      public void resourceChanged(ResourceEvent e) {
+        repaint();
+      }
+
+      @Override
+      public void resourceAssignmentsChanged(ResourceEvent e) {
+        repaint();
+      }
+
+      @Override
+      public void resourceStructureChanged() {
+
+      }
+
+      @Override
+      public void resourceModelReset() {
+        repaint();
+      }
+    });
     tableConnector.getCollapseView().getExpandedCount().addWatcher(evt -> {
       repaint();
       return Unit.INSTANCE;

@@ -81,11 +81,11 @@ public class DateIntervalListEditor extends JPanel {
     }
 
     public static DateInterval createFromModelDates(Date start, Date end) {
-      return new DateInterval(start, GPTimeUnitStack.DAY.adjustLeft(GPTimeUnitStack.DAY.jumpLeft(end)), end);
+      return new DateInterval(GPTimeUnitStack.DAY.adjustLeft(start), GPTimeUnitStack.DAY.adjustLeft(GPTimeUnitStack.DAY.jumpLeft(end)), end);
     }
 
     public static DateInterval createFromVisibleDates(Date start, Date end) {
-      return new DateInterval(start, end, GPTimeUnitStack.DAY.adjustRight(end));
+      return new DateInterval(GPTimeUnitStack.DAY.adjustLeft(start), end, GPTimeUnitStack.DAY.adjustRight(end));
     }
   }
 

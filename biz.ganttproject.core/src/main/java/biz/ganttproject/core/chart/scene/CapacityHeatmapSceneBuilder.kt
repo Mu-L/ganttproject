@@ -143,7 +143,7 @@ class CapacityHeatmapSceneBuilder(
   private fun Long.toDate() = Date.from(Instant.ofEpochMilli(this))
 
   class Resource(val loads: List<Load>, val isExpanded: Boolean = false)
-  class Load(val startTs: Long, val endTs: Long, val load: Float, val taskId: Int? = null)
+  data class Load(val startTs: Long, val endTs: Long, val load: Float, val taskId: Int? = null)
 
   interface InputApi {
     fun getYCanvasOffset(): Int

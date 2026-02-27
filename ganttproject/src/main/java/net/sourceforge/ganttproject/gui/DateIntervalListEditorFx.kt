@@ -87,7 +87,7 @@ class DateIntervalListEditorFx(private val model: DateIntervalModel) : HBox() {
     override val isDisabled: Boolean
       get() = listView.isDisable
     override val itemCount: Int
-      get() = listView.items.size
+      get() = listView.items.size + 1
   }
 
   private val component = AbstractTableAndActionsComponentFx(listView, tableActionsModel)

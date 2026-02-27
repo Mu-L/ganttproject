@@ -80,7 +80,9 @@ public class GanttDialogPerson {
       OkAction okAction = new OkAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          okButtonActionPerformed();
+          // If called from JavaFX thread, the undo manager fails badly
+          // along with the VM.
+          SwingUtilities.invokeLater(() -> okButtonActionPerformed());
           onHide.run();
           myUIFacade.getActiveChart().focus();
         }

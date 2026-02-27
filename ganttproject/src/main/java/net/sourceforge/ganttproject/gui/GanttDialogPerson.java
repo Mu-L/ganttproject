@@ -18,7 +18,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 package net.sourceforge.ganttproject.gui;
 
-import biz.ganttproject.app.DialogController;
 import biz.ganttproject.core.calendar.GanttDaysOff;
 import biz.ganttproject.customproperty.CustomPropertyManager;
 import com.google.common.collect.Lists;
@@ -26,8 +25,6 @@ import javafx.scene.control.Tab;
 import kotlin.Unit;
 import net.sourceforge.ganttproject.action.CancelAction;
 import net.sourceforge.ganttproject.action.OkAction;
-import net.sourceforge.ganttproject.gui.DateIntervalListEditor.DateInterval;
-import net.sourceforge.ganttproject.gui.DateIntervalListEditor.DefaultDateIntervalModel;
 import net.sourceforge.ganttproject.gui.resourceproperties.MainPropertiesPanel;
 import net.sourceforge.ganttproject.gui.resourceproperties.ResourceAssignmentsPanelFx;
 import net.sourceforge.ganttproject.gui.taskproperties.CustomColumnsPanel;
@@ -170,7 +167,7 @@ public class GanttDialogPerson {
 
     person.getDaysOff().clear();
     for (DateInterval interval : myDaysOffModel.getIntervals()) {
-      person.addDaysOff(new GanttDaysOff(interval.start, interval.getEnd()));
+      person.addDaysOff(new GanttDaysOff(interval.getStart(), interval.getEnd()));
     }
     myAssignmentsPanel.commit();
   }
@@ -178,7 +175,7 @@ public class GanttDialogPerson {
   private DefaultDateIntervalModel myDaysOffModel;
 
   private void constructDaysOffPanel() {
-    myDaysOffModel = new DateIntervalListEditor.DefaultDateIntervalModel() {
+    myDaysOffModel = new DefaultDateIntervalModel() {
       @Override
       public int getMaxIntervalLength() {
         return 2;
@@ -197,7 +194,7 @@ public class GanttDialogPerson {
     DefaultListModel<GanttDaysOff> daysOff = person.getDaysOff();
     for (int i = 0; i < daysOff.getSize(); i++) {
       GanttDaysOff next = daysOff.get(i);
-      myDaysOffModel.add(DateIntervalListEditor.DateInterval.createFromModelDates(next.getStart().getTime(),
+      myDaysOffModel.add(DateInterval.Companion.createFromModelDates(next.getStart().getTime(),
           next.getFinish().getTime()));
     }
   }

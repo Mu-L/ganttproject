@@ -19,6 +19,7 @@ along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
 package net.sourceforge.ganttproject.gui
 
 import biz.ganttproject.app.*
+import biz.ganttproject.core.time.impl.GPTimeUnitStack
 import javafx.collections.ObservableList
 import javafx.scene.control.Button
 import javafx.scene.control.ButtonType
@@ -27,11 +28,11 @@ import javafx.scene.control.ListView
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import net.sourceforge.ganttproject.calendar.MultiDatePicker
-import net.sourceforge.ganttproject.gui.DateIntervalListEditor.DateInterval
-import net.sourceforge.ganttproject.gui.DateIntervalListEditor.DateIntervalModel
+import net.sourceforge.ganttproject.language.GanttLanguage
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
+import kotlin.collections.toTypedArray
 
 class DateIntervalListEditorFx(private val model: DateIntervalModel) : HBox() {
   private val listView = ListView<DateInterval>()
@@ -155,3 +156,75 @@ fun showDatePicker(addInterval: (DateInterval)->Unit) {
   }
 }
 
+class DateInterval private constructor(val start: Date, val visibleEnd: Date?, val end: Date?) {
+  override fun equals(obj: Any?): Boolean {
+    if (false == obj is DateInterval) {
+      return false
+    }
+    val rvalue = obj
+    return this.start == rvalue.start && this.end == rvalue.end
+  }
+
+  override fun hashCode(): Int {
+    return this.start.hashCode()
+  }
+
+  companion object {
+    fun createFromModelDates(start: Date?, end: Date?): DateInterval {
+      return DateInterval(
+        GPTimeUnitStack.DAY.adjustLeft(start),
+        GPTimeUnitStack.DAY.adjustLeft(GPTimeUnitStack.DAY.jumpLeft(end)),
+        end
+      )
+    }
+
+    fun createFromVisibleDates(start: Date?, end: Date?): DateInterval {
+      return DateInterval(GPTimeUnitStack.DAY.adjustLeft(start), end, GPTimeUnitStack.DAY.adjustRight(end))
+    }
+  }
+}
+
+interface DateIntervalModel {
+  val intervals: Array<DateInterval>
+
+  fun remove(interval: DateInterval)
+
+  fun add(interval: DateInterval)
+
+  val maxIntervalLength: Int
+
+  fun canRemove(interval: DateInterval): Boolean
+
+  fun format(interval: DateInterval): String
+}
+
+open class DefaultDateIntervalModel : DateIntervalModel {
+  private val myIntervals: MutableList<DateInterval> = ArrayList<DateInterval>()
+
+  override val intervals: Array<DateInterval>
+    get() = myIntervals.toTypedArray()
+
+  override fun remove(interval: DateInterval) {
+    myIntervals.remove(interval)
+  }
+
+  override fun add(interval: DateInterval) {
+    myIntervals.add(interval)
+  }
+
+  override val maxIntervalLength: Int
+    get() = 1
+
+  override fun canRemove(interval: DateInterval): Boolean {
+    return true
+  }
+
+  override fun format(interval: DateInterval): String {
+    val result = StringBuffer(GanttLanguage.getInstance().getDateFormat().format(interval.start))
+    if (interval.end != interval.start) {
+      result.append("...")
+      result.append(GanttLanguage.getInstance().getDateFormat().format(interval.visibleEnd))
+    }
+    return result.toString()
+  }
+}

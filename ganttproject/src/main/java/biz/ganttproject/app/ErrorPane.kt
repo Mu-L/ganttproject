@@ -18,11 +18,17 @@ along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
 */
 package biz.ganttproject.app
 
+import biz.ganttproject.printCss
+import biz.ganttproject.walkTree
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Label
 import javafx.scene.layout.HBox
 
+
 class ErrorPane {
+  enum class MessageType {
+    ERROR, WARNING, INFO
+  }
   val hasErrorsProperty = SimpleBooleanProperty(false)
   val fxNode by lazy {
     errorPane.styleClass.addAll(boxStyleClass, "noerror")
@@ -42,8 +48,13 @@ class ErrorPane {
   }
 
   fun onError(it: String?) {
+    message(it, MessageType.ERROR)
+  }
+
+  fun message(it: String?, messageType: MessageType) {
     if (it.isNullOrBlank()) {
       errorPane.isVisible = false
+      errorPane.styleClass.removeAll(MessageType.entries.map { it.name.lowercase() })
       if (!errorPane.styleClass.contains("noerror")) {
         errorPane.styleClass.add("noerror")
       }
@@ -54,8 +65,15 @@ class ErrorPane {
       errorLabel.text = it
       errorPane.isVisible = true
       errorPane.styleClass.remove("noerror")
+      errorPane.styleClass.add(messageType.name.lowercase())
+      errorPane.walkTree { it.printCss() }
       hasErrorsProperty.value = true
     }
   }
 
+  fun warning(msg: String) {
+    message (msg, MessageType.WARNING)
+  }
+
+  fun clear() = onError(null)
 }

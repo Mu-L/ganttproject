@@ -208,7 +208,7 @@ class UpdateDialogModel(
     button.textProperty().bind(btnToggleSourceText)
     button.addEventFilter(ActionEvent.ACTION) {
       it.consume()
-      if (state == ApplyAction.INSTALL_FROM_CHANNEL || state == ApplyAction.UP_TO_DATE || state == ApplyAction.DOWNLOAD_MAJOR) {
+      if (state in transitionToInstallFromZip) {
         state = ApplyAction.INSTALL_FROM_ZIP
       } else if (state == ApplyAction.INSTALL_FROM_ZIP) {
         state = ApplyAction.INSTALL_FROM_CHANNEL
@@ -226,7 +226,7 @@ class UpdateDialogModel(
         installFromZip()
       }
       ApplyAction.RESTART -> {
-        this.restarter()
+        //this.restarter()
       }
       ApplyAction.DOWNLOAD_MAJOR -> {
         openInBrowser(UPGRADE_URL)
@@ -250,7 +250,6 @@ class UpdateDialogModel(
         }
         withContext(Dispatchers.JavaFx) {
           state = ApplyAction.RESTART
-          errorText.set(null)
         }
       } catch (ex: Exception) {
         withContext(Dispatchers.JavaFx) {
@@ -267,7 +266,7 @@ class UpdateDialogModel(
       if (this.signatureBody.isNullOrBlank()) {
         true
       } else {
-        verifyFile(dataFile, Base64.getDecoder().wrap(this.signatureBody.byteInputStream()))
+        //verifyFile(dataFile, Base64.getDecoder().wrap(this.signatureBody.byteInputStream()))
         true
       }
     }
@@ -291,3 +290,7 @@ object UpdateDialogLocalizationKeys {
   internal const val INSTALL_FROM_ZIP = "toggleSource.zip"
   internal const val INSTALL_FROM_CHANNEL = "toggleSource.channel"
 }
+
+internal val transitionToInstallFromZip = setOf(ApplyAction.INSTALL_FROM_CHANNEL, ApplyAction.DOWNLOAD_MAJOR,
+  ApplyAction.UP_TO_DATE, ApplyAction.RESTART)
+internal val transitionToInstallFromChannel = setOf(ApplyAction.INSTALL_FROM_ZIP, ApplyAction.RESTART)

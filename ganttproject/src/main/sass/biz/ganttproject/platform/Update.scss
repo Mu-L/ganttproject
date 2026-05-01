@@ -159,7 +159,14 @@
   }
 
   .alert-embedded-box {
-    @include error-embedded-box($gp-error);
+    -fx-border-color: green;
+    &.error {
+      -fx-border-color: red;
+      @include error-embedded-box($gp-error);
+    }
+    &.warning {
+      @include error-embedded-box($gp-orange);
+    }
     .alert-error {
       @include error-label();
     }

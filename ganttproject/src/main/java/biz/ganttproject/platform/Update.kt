@@ -79,7 +79,10 @@ fun updatesAvailableDialog(model: UpdateDialogModel,
 internal class UpdateDialog(private val model: UpdateDialogModel) {
 
   private lateinit var dialogApi: DialogController
-  private val errorPane = ErrorPane()
+  private val errorPane = ErrorPane().also {
+    it.boxStyleClass = "alert-embedded-box"
+    it.labelStyleClass = "alert-error"
+  }
   // Progress indicator
   private val installFromZipUi by lazy {
     UpdateFromZip(model, ourLocalizer).also {
@@ -98,14 +101,17 @@ internal class UpdateDialog(private val model: UpdateDialogModel) {
   init {
     model.localizer = ourLocalizer
     model.stateProperty.subscribe { oldValue, newValue ->
-      if ((oldValue == ApplyAction.INSTALL_FROM_CHANNEL || oldValue == ApplyAction.DOWNLOAD_MAJOR || oldValue == ApplyAction.UP_TO_DATE) && newValue == ApplyAction.INSTALL_FROM_ZIP) {
+      println("State transition: $oldValue -> $newValue")
+      if (oldValue in transitionToInstallFromZip && newValue == ApplyAction.INSTALL_FROM_ZIP) {
         FXUtil.transitionCenterPane(dialogContent, installFromZipUi.node, dialogApi::resize)
+        model.errorText.set(null, this)
       }
-      if (oldValue == ApplyAction.INSTALL_FROM_ZIP && (newValue == ApplyAction.INSTALL_FROM_CHANNEL || newValue == ApplyAction.DOWNLOAD_MAJOR)) {
+      if (oldValue in transitionToInstallFromChannel && (newValue == ApplyAction.INSTALL_FROM_CHANNEL || newValue == ApplyAction.DOWNLOAD_MAJOR)) {
         FXUtil.transitionCenterPane(dialogContent, installFromChannelUi.node, dialogApi::resize)
+        model.errorText.set(null, this)
       }
       if (newValue == ApplyAction.RESTART) {
-        errorPane.onError(ourLocalizer.formatText("restartRequired"))
+        errorPane.warning(ourLocalizer.formatText("restartRequired"))
       }
     }
     model.initState()

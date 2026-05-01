@@ -25,7 +25,13 @@
 }
 
 .hint-validation-pane {
-  @include error-embedded-box($gp-orange);
+  &.error {
+    @include error-embedded-box($gp-error);
+  }
+  &.warning {
+    @include error-embedded-box($gp-orange);
+  }
+
   &.noerror {
     /*visibility: hidden;*/
     -fx-background-color: transparent;

@@ -1,3 +1,6 @@
+import javax.inject.Inject
+import org.gradle.api.file.FileSystemOperations
+import org.gradle.process.ExecOperations
 
 // Path to launch4j binary
 ext.launch4j = '/opt/launch4j/launch4j'
@@ -9,10 +12,15 @@ version = "${rootProject.version}"
 ant.importBuild 'build.xml'
 ant.properties.distBin = 'dist-bin'
 ant.properties.distDebWork = "deb"
-ant.properties.distDebPackage = "${rootProject.buildDir}/distributions"
+ant.properties.distDebPackage = "${rootProject.layout.buildDirectory.dir('distributions').get().asFile}"
 ant.properties.version = "${rootProject.version}"
 ant.properties.version_build = "${rootProject.version}"
 
+interface InjectedServices {
+    @Inject FileSystemOperations getFs()
+    @Inject ExecOperations getExec()
+}
+def injected = objects.newInstance(InjectedServices)
 
 def devNull = new OutputStream() {
     @Override
@@ -36,7 +44,7 @@ task distBin(dependsOn: [
     println "===== Building GanttProject ${version} ====="
     println "===== Building generic binary distro ====="
     doLast {
-        copy {
+        injected.fs.copy {
             into(rootProject.distBinDir)
             from(fileTree(".")) {
                 include "lib/javagalician.jar"
@@ -49,7 +57,7 @@ task distBin(dependsOn: [
                 include "LICENSE"
             }
         }
-        copy {
+        injected.fs.copy {
             into(rootProject.distBinDir)
             from(fileTree(".")) {
                 include "ganttproject"
@@ -59,7 +67,7 @@ task distBin(dependsOn: [
                 unix("rwxr-xr-x")
             }
         }
-        copy {
+        injected.fs.copy {
             into(rootProject.pluginsDir)
             from(fileTree(".")) {
                 include "VERSION"
@@ -70,7 +78,7 @@ task distBin(dependsOn: [
 
 tasks.register('distZip', Zip) {
     archiveFileName = "ganttproject-${version}.zip"
-    destinationDirectory = new File(rootProject.buildDir, "distributions")
+    destinationDirectory = rootProject.layout.buildDirectory.dir("distributions")
     from 'dist-bin'
 }
 tasks.distZip.dependsOn distBin
@@ -91,12 +99,12 @@ task distWin(dependsOn: distBin) {
 //            standardOutput = devNull
 //        }
         println '= Copying required files to dist-win...'
-        copy {
+        injected.fs.copy {
             from 'dist-bin'
             into 'dist-win'
             include '**'
         }
-        copy {
+        injected.fs.copy {
             from '.'
             into 'dist-win'
             include "ganttproject.l4j.ini"
@@ -105,7 +113,7 @@ task distWin(dependsOn: distBin) {
             include "ganttproject.ico"
             rename 'ganttproject.nsi.tpl', 'ganttproject.nsi'
         }
-        copy {
+        injected.fs.copy {
             from '..'
             into 'dist-win'
             include 'runtime/**'
@@ -127,7 +135,7 @@ task distWin(dependsOn: distBin) {
 
 task distDebPre {
     doFirst {
-        copy {
+        injected.fs.copy {
             into 'deb/usr/share/doc/ganttproject'
             from(rootProject.projectDir) {
                 include "AUTHORS"
@@ -135,15 +143,13 @@ task distDebPre {
                 include "README"
             }
         }
-        exec {
-            commandLine "gzip"
-            args "-n", "-f", "deb/usr/share/doc/ganttproject/CHANGELOG"
+        injected.exec.exec {
+            commandLine "gzip", "-n", "-f", "deb/usr/share/doc/ganttproject/CHANGELOG"
         }
-        exec {
-            commandLine "mv"
-            args "deb/usr/share/doc/ganttproject/CHANGELOG.gz", "deb/usr/share/doc/ganttproject/changelog.Debian.gz"
+        injected.exec.exec {
+            commandLine "mv", "deb/usr/share/doc/ganttproject/CHANGELOG.gz", "deb/usr/share/doc/ganttproject/changelog.Debian.gz"
         }
-        mkdir("${rootProject.buildDir}/distributions")
+        rootProject.layout.buildDirectory.dir("distributions").get().asFile.mkdirs()
     }
 }
 

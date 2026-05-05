@@ -226,7 +226,8 @@ class UpdateDialogModel(
         installFromZip()
       }
       ApplyAction.RESTART -> {
-        //this.restarter()
+        // We are not handling restart action here for a while, since restarting a JavaFX app is tricky.
+        // this.restarter()
       }
       ApplyAction.DOWNLOAD_MAJOR -> {
         openInBrowser(UPGRADE_URL)
@@ -266,7 +267,7 @@ class UpdateDialogModel(
       if (this.signatureBody.isNullOrBlank()) {
         true
       } else {
-        //verifyFile(dataFile, Base64.getDecoder().wrap(this.signatureBody.byteInputStream()))
+        verifyFile(dataFile, Base64.getDecoder().wrap(this.signatureBody.byteInputStream()))
         true
       }
     }

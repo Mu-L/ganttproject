@@ -125,7 +125,7 @@ task addPublicKey(type: Zip) {
     destinationDirectory = temporaryDir
     from zipTree("${projectDir}/lib/core/eclipsito.jar")
     from("${rootProject.projectDir}/build-cfg") {
-        include "ganttproject-3.4.3390.asc"
+        include "ganttproject-3.4.3390.pub.asc"
     }
 }
 

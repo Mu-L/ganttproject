@@ -120,15 +120,22 @@ sourceSets {
     test.kotlin.srcDirs += "src/test/java"
 }
 
-task copyPlugin(dependsOn: jar) {
+task addPublicKey(type: Zip) {
+    archiveFileName = "eclipsito.jar"
+    destinationDirectory = temporaryDir
+    from zipTree("${projectDir}/lib/core/eclipsito.jar")
+    from("${rootProject.projectDir}/build-cfg") {
+        include "ganttproject-3.4.3390.asc"
+    }
+}
+
+task copyPlugin(dependsOn: [jar, addPublicKey]) {
     def pluginDistDir = new File(rootProject.pluginsDir, project.name)
     doLast {
         println ">>> ------------ Installing $project.name into $pluginDistDir ------------"
         copy {
             into(rootProject.distBinDir)
-            from(fileTree("lib/core")) {
-                include "eclipsito.jar"
-            }
+            from(addPublicKey.outputs)
             from(fileTree("src/main/resources")) {
                 include 'logging.properties'
                 include "logback.xml"

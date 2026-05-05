@@ -8,7 +8,7 @@
   <cmdLine>--verbosity 1 --version-dirs plugins;~/.ganttproject.d/updates --app net.sourceforge.ganttproject.GanttProject</cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
-  <downloadUrl>https://bell-sw.com/pages/downloads/#/java-17-lts</downloadUrl>
+  <downloadUrl>https://bell-sw.com/pages/downloads/#/java-21-lts</downloadUrl>
   <supportUrl>https://help.ganttproject.biz</supportUrl>
   <stayAlive>true</stayAlive>
   <restartOnCrash>false</restartOnCrash>
@@ -35,7 +35,7 @@
     <txtFileVersion>GanttProject 3.4 Beta III</txtFileVersion>
     <fileDescription>GanttProject Launcher</fileDescription>
     <copyright>Copyright (C) 2026 BarD Software s.r.o.</copyright>
-    <productVersion>3.4.3391.0</productVersion>
+    <productVersion>3.4.3392.0</productVersion>
     <txtProductVersion>GanttProject 3.4 Beta</txtProductVersion>
     <productName>GanttProject</productName>
     <companyName>BarD Software s.r.o.</companyName>

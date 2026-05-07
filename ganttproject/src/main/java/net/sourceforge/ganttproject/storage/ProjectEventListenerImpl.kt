@@ -51,9 +51,13 @@ internal class ProjectEventListenerImpl(
   }
 
   fun whenTablesInitialized(project: IGanttProject) {
+    initProjectDatabase()
+  }
+
+  private fun initProjectDatabase() {
     projectDatabase.isProjectOpen = true
-    projectDatabase.onCustomColumnChange(project.taskCustomColumnManager)
-    project.taskManager.tasks.forEach(projectDatabase::insertTask)
+    projectDatabase.onCustomColumnChange(taskManagerSupplier().customPropertyManager)
+    taskManagerSupplier().tasks.forEach(projectDatabase::insertTask)
     calculatedPropertyUpdater.update()
     filterUpdater()
   }
@@ -111,9 +115,7 @@ internal class ProjectEventListenerImpl(
   override fun projectRestoring(completion: Barrier<Document?>) {
     completion.await {
       projectDatabase.shutdown()
-      projectDatabase.onCustomColumnChange(taskManagerSupplier().customPropertyManager)
-      taskManagerSupplier().tasks.forEach(projectDatabase::insertTask)
-      calculatedPropertyUpdater.update();
+      initProjectDatabase()
     }
   }
 

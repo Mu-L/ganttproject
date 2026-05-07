@@ -64,7 +64,7 @@ class LazyProjectDatabaseProxy(
     }
   }
 
-  var isProjectOpen: Boolean = true
+  internal var isProjectOpen: Boolean = true
 
   private var lazyProjectDatabase: ProjectDatabase? = null
   private val calculatedPropertyUpdater by lazy {
